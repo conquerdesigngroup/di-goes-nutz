@@ -826,15 +826,17 @@ const irises = [...eyes.querySelectorAll('.iris')];
 const score = $('#score'), bubble = $('#bubble'), bestEl = $('#best'), unlock = $('#unlock'), startBtn = $('#nutStart');
 const missDots = $$('#misses i'), missBox = $('#misses');
 const MOUTH = [100, 196], FLOOR = 470;
-let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, chompUntil = 0, combo = 0;
+let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, chompUntil = 0, combo = 0, cracked = 0;
 try { best = +localStorage.getItem('dgn-best') || 0; } catch (e) {}
 const showBest = () => bestEl.textContent = best ? `Your best: ${best}` : ''; showBest();
 const say = (t) => { bubble.textContent = t; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); };
 const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses in a row: ${misses} of 5`); };
-const gravity = () => .00026 * (1 + Math.min(n, 30) * .02);   // svg units per ms², creeps up with score
+// difficulty: every 2 nuts cracked the whole toss plays 6% faster, topping out at 1.9x after 30 nuts
+const level = () => Math.min(15, Math.floor(cracked / 2)), pace = () => 1 + level() * .06;
+const gravity = () => .00026 * pace() ** 2;                     // svg units per ms²; squared so the whole arc speeds up evenly
 // the screen's left/right edges and bottom, in the nutcracker's svg units (re-read every toss, so resize/rotation just works)
 const edges = () => { const r = stage.querySelector('svg').getBoundingClientRect(), k = r.width / 200 || 1; return { l: -r.left / k - 18, r: (innerWidth - r.left) / k + 18, b: (innerHeight - r.top) / k + 30 }; };
-const reach = () => Math.max(18, 26 - n * .3);                  // how close the nut must be to get chomped
+const reach = () => 24;                  // how close the nut must be to get chomped
 const toScreen = (x, y) => { const r = stage.querySelector('svg').getBoundingClientRect(); return [r.left + r.width * x / 200, r.top + r.height * y / 440]; };
 const flyText = (txt, bad) => { const el = document.createElement('span'); el.className = 'flyer' + (bad ? ' bad' : ''); el.textContent = txt; el.style.left = '50%'; el.style.top = '40%'; stage.appendChild(el); setTimeout(() => el.remove(), 750); };
 const setJaw = (px) => jaw.style.transform = `translateY(${px}px)`;
@@ -861,10 +863,10 @@ function hooray(step) { [0, 4, 7].forEach((semi, i) => setTimeout(() => bell(523
 function launch() {
 if (!running) return;
 const dir = Math.random() < .5 ? -1 : 1, e = edges(), x0 = Math.max(-600, Math.min(800, dir < 0 ? e.l : e.r)), y0 = 300 + Math.random() * 80;
-const h = Math.random() * Math.min(30, 4 + n);                 // the arc peaks at, or just above, the mouth
+const h = Math.random() * 12;                 // the arc peaks at, or just above, the mouth
 const yA = MOUTH[1] - h, up = Math.sqrt(2 * (y0 - yA)) + Math.sqrt(2 * h);
 let g = gravity(), T = up / Math.sqrt(g);                      // time to reach the mouth under normal gravity
-const far = Math.abs(MOUTH[0] - x0); if (far / T > .16) { T = Math.min(1900, far / .16); g = (up / T) ** 2; } // long throws on wide screens get a higher, floatier lob
+const far = Math.abs(MOUTH[0] - x0), vmax = .16 * pace(); if (far / T > vmax) { T = Math.min(1900 / pace(), far / vmax); g = (up / T) ** 2; } // long throws on wide screens get a higher, floatier lob
 const vy = -Math.sqrt(2 * g * (y0 - yA)), vx = (MOUTH[0] - x0) / T;
 cur = { x0, y0, vx, vy, g, T, e, t0: performance.now(), x: x0, y: y0, done: false, spin: -dir * .3, wide: Math.min(2.2, Math.max(1, Math.abs(vx) / .11)) };
 nut.setAttribute('opacity', '1'); place(x0, y0, 0); setJaw(7); whoosh();
@@ -911,7 +913,7 @@ anim(stage, [{ transform: 'translate(0,0)' }, { transform: 'translate(-4px,2px)'
 hooray(combo);
 if (cracker.animate) cracker.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-6px) scale(1.02,.98)' }, { transform: 'translateY(0) scale(1)' }], { duration: 220, easing: 'ease-out' });
 if (navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
-n += perfect ? 2 : 1; misses = 0; setMisses();
+n += perfect ? 2 : 1; misses = 0; setMisses(); const was = level(); cracked++; const sped = level() > was;
 score.textContent = n; if (score.animate) score.animate([{ transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 250, easing: 'cubic-bezier(.3,1.6,.5,1)' });
 flyText(perfect ? 'PERFECT! +2' : combo >= 3 ? `${combo} IN A ROW!` : ['CRUNCH!', 'CHOMP!', 'CRACK!', 'SNAP!'][n % 4]);
 if (perfect) { confetti(px, py, 26, 6); bell(1567.98, .5, .12); }
@@ -921,7 +923,8 @@ say(hitLine ? lines[hitLine] : perfect ? 'Dead centre!' : ['Crunch!', 'Nice!', '
 if (hitLine) { const [x, y] = centerOf(score); confetti(x, y, 60, 9); [1046.5, 1318.5, 1567.98].forEach((f, i) => setTimeout(() => bell(f, 1.1, .15), i * 120)); }
 if (n >= 15) unlock.hidden = false;
 if (n > best) { best = n; try { localStorage.setItem('dgn-best', best); } catch (e) {} showBest(); }
-next(Math.max(240, 600 - n * 12));
+if (sped) setTimeout(() => flyText('FASTER!'), 420);
+next(Math.max(300, 600 - level() * 20));
 }
 function tap() {
 if (!running) return start();
@@ -936,7 +939,7 @@ if (d <= reach()) { chomp(); return crackNow(d); }
 chomp(); clack();                                              // bit thin air
 }
 function start() {
-n = 0; misses = 0; combo = 0; score.textContent = 0; eyes.dataset.lock = '1'; setMisses(); running = true; startBtn.hidden = true; unlock.hidden = true;
+n = 0; misses = 0; combo = 0; cracked = 0; score.textContent = 0; eyes.dataset.lock = '1'; setMisses(); running = true; startBtn.hidden = true; unlock.hidden = true;
 say('Here they come!'); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); next(700);
 }
 function gameOver() {
