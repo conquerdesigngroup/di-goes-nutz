@@ -197,14 +197,18 @@ background:radial-gradient(circle at 100% 0,rgba(227,25,47,.12),transparent 50%)
 transform-origin:0 100%;transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .buddy-say.show{transform:scale(1)}
 /* the hero nutcracker leans out from behind the logo, waving */
-.logo-wrap{position:relative;width:min(88vw,520px);margin-inline:auto}
+.logo-wrap{position:relative;width:min(78vw,520px);margin-inline:auto;translate:-4% 0}
+@media (min-width:640px){.logo-wrap{width:min(84vw,520px);translate:none}}
 .logo-wrap .logo-btn{width:100%;max-width:none;z-index:2}
-.logo-wrap .buddy{position:absolute;z-index:1;width:28%;right:2%;top:30%;rotate:24deg;transform-origin:30% 90%}
+.logo-wrap .buddy{position:absolute;z-index:1;width:25%;right:-6%;top:13%;rotate:14deg;transform-origin:30% 90%}
 .logo-wrap .buddy svg{-webkit-mask-image:none;mask-image:none;overflow:visible}
-.logo-wrap .buddy-say{left:58%;bottom:auto;top:-16%;transform-origin:0 100%;rotate:-24deg}
+.logo-wrap .buddy-say{left:58%;bottom:auto;top:-14%;transform-origin:0 100%;rotate:-14deg}
 .buddy .wave{transform-box:fill-box;transform-origin:50% 5%;animation:wave 1.6s ease-in-out infinite}
 @keyframes wave{0%,100%{transform:rotate(-178deg)}50%{transform:rotate(-138deg)}}
-@media (min-width:820px){.logo-wrap .buddy{right:-8%;top:26%;width:30%}}
+.buddy .grab{transform-box:fill-box;transform-origin:50% 5%;transform:rotate(128deg)}
+.logo-wrap .grip{position:absolute;z-index:3;left:94.2%;top:30.5%;width:3.6%;aspect-ratio:1;border-radius:50%;background:#f2c2a0;box-shadow:inset -2px -2px 0 rgba(0,0,0,.12);pointer-events:none;animation:float 4.5s ease-in-out infinite}
+.logo-wrap .grip::before,.logo-wrap .grip::after{content:"";position:absolute;left:-30%;width:60%;height:24%;border-radius:999px;background:#f2c2a0;box-shadow:inset 0 -1px 0 rgba(0,0,0,.15)}
+.logo-wrap .grip::before{top:18%}.logo-wrap .grip::after{top:52%}
 .buddy.talking .wave{animation-duration:.5s}
 
 .eyes{transform-box:fill-box;transform-origin:50% 50%;transition:transform .08s}
@@ -359,6 +363,7 @@ html.centered .namegen{display:block}
 <button class="logo-btn" id="logoBtn" type="button" aria-label="DI Goes Nutz logo. Tap for confetti.">
 <img src="/assets/logo.webp" width="900" height="1033" alt="DI Goes Nutz">
 </button>
+<span class="grip" aria-hidden="true"></span>
 </div>
 <div class="hero-copy">
 <div class="intro">
@@ -968,7 +973,8 @@ startBtn.addEventListener('click', start);
 })();
 const buddySvg = $('#buddy svg');
 buddySvg.innerHTML = '<g class="bod">' + $('#cracker').innerHTML.replace(/\sid="[^"]+"/g, '') + '</g>';
-buddySvg.querySelectorAll('rect[x="146"],rect[x="145"],circle[cx="158"]').forEach(el => el.remove());
+buddySvg.querySelectorAll('rect[x="146"],rect[x="145"],circle[cx="158"],rect[x="30"],rect[x="29"],circle[cx="42"]').forEach(el => el.remove());
+buddySvg.querySelector('.bod').insertAdjacentHTML('beforeend', '<g class="grab"><rect x="30" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="29" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="42" cy="350" r="12" fill="#f2c2a0"/></g>');
 buddySvg.querySelector('.bod').insertAdjacentHTML('beforeend', '<g class="wave"><rect x="146" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="145" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="158" cy="350" r="12" fill="#f2c2a0"/></g>');
 (function buddy() {
 const b = $('#buddy'), say = $('#buddySay'), jaw = b.querySelector('.jaw');
