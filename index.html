@@ -132,6 +132,8 @@ box-shadow:0 8px 0 rgba(0,0,0,.22);transform:rotate(var(--r,0deg))}
 .best{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .unlock[hidden]{display:none}
 .misses{display:flex;gap:8px;justify-content:center}
+.round{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);text-align:center;margin-top:-4px}
+.round b{color:var(--gold);font-weight:700}
 .misses i{width:22px;height:20px;border-radius:50% 50% 46% 46%;background:#9a6232;opacity:.9;position:relative;transition:transform .2s,background .2s}
 .misses i::after{content:"";position:absolute;left:50%;top:3px;bottom:3px;width:2px;margin-left:-1px;background:#6b3f1c;border-radius:2px}
 .misses i.x{background:var(--candy);transform:scale(1.15) rotate(12deg)}
@@ -410,7 +412,7 @@ Get Tickets
 <div class="sec-head" data-reveal>
 <span class="eyebrow">The Nutcracker's workshop</span>
 <h2 id="gameTitle">Crack <span class="red">a nut</span></h2>
-<p class="lede">Walnuts get tossed up at his mouth. Tap the Nutcracker to chomp right as one flies past his mouth. Let 3 get away in a row and you start over.</p>
+<p class="lede">Walnuts get tossed up at his mouth. Tap the Nutcracker to chomp right as one flies past his mouth. Walnuts come in rounds of 10. Miss 3 in one round and you start over.</p>
 </div>
 <div class="game">
 <button class="stage" id="stage" type="button" aria-label="Tap the Nutcracker to crack a nut">
@@ -480,7 +482,8 @@ Get Tickets
 <div class="score" id="score" aria-live="polite">0</div>
 <div class="score-label">nuts cracked</div>
 </div>
-<div class="misses" id="misses" aria-label="Misses in a row: 0 of 3"><i></i><i></i><i></i></div>
+<div class="misses" id="misses" aria-label="Misses this round: 0 of 3"><i></i><i></i><i></i></div>
+<div class="round" id="round" aria-live="polite">Round <b>1</b> · Toss <b>1</b> of 10</div>
 <div class="bubble" id="bubble">Ready? Chomp them mid-air.</div>
 <button class="btn" id="nutStart" type="button">Start cracking</button>
 <div class="best" id="best"></div>
@@ -835,13 +838,16 @@ tick();
 const stage = $('#stage'), jaw = $('#jaw'), nut = $('#nut'), cracker = $('#cracker'), hat = $('#hat'), eyes = $('#gEyes'), stache = $('#stache'), cheeks = $('#cheeks');
 const irises = [...eyes.querySelectorAll('.iris')], armL = $('#armL'), armR = $('#armR');
 const score = $('#score'), bubble = $('#bubble'), bestEl = $('#best'), unlock = $('#unlock'), startBtn = $('#nutStart');
-const missDots = $$('#misses i'), missBox = $('#misses');
+const missDots = $$('#misses i'), missBox = $('#misses'), roundEl = $('#round');
 const MOUTH = [100, 196], FLOOR = 470;
-let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, chompUntil = 0, combo = 0, cracked = 0;
+let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, chompUntil = 0, combo = 0, cracked = 0, round = 1, tossN = 0;
 try { best = +localStorage.getItem('dgn-best') || 0; } catch (e) {}
 const showBest = () => bestEl.textContent = best ? `Your best: ${best}` : ''; showBest();
 const say = (t) => { bubble.textContent = t; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); };
-const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses in a row: ${misses} of 3`); };
+const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses this round: ${misses} of 3`); };
+const setRound = () => roundEl.innerHTML = `Round <b>${round}</b> · Toss <b>${Math.min(10, tossN + 1)}</b> of 10`;
+// throws come in rounds of 10: 3 misses inside one round ends the game, and misses reset when a new round starts
+function endToss() { tossN++; if (tossN < 10) return setRound(); round++; tossN = 0; misses = 0; setMisses(); setRound(); setTimeout(() => { flyText(`ROUND ${round}!`); say('New round! Misses reset.'); }, 450); }
 // difficulty: every nut cracked makes the whole toss 5% faster, topping out at 2x after 20 nuts
 const level = () => Math.min(20, cracked), pace = () => 1 + level() * .05;
 const gravity = () => .00026 * pace() ** 2;                     // svg units per ms²; squared so the whole arc speeds up evenly
@@ -873,13 +879,16 @@ function hooray(step) { [0, 4, 7].forEach((semi, i) => setTimeout(() => bell(523
 // gently lob a nut in from off either side so its arc passes through the centre of the mouth
 function launch() {
 if (!running) return;
-const dir = Math.random() < .5 ? -1 : 1, e = edges(), x0 = Math.max(-600, Math.min(800, dir < 0 ? e.l : e.r)), y0 = 300 + Math.random() * 80;
-const h = Math.random() * 12;                 // the arc peaks at, or just above, the mouth
+// every toss is a different style, but each one is solved so its parabola runs through the mouth
+const STYLES = [[300, 380, 0, 12], [380, 460, 0, 8], [230, 290, 0, 6], [310, 400, 30, 60], [340, 430, 60, 95]]; // [launch y min, max, peak above mouth min, max]
+const st = STYLES[Math.random() * STYLES.length | 0], rnd = (a, b) => a + Math.random() * (b - a);
+const dir = Math.random() < .5 ? -1 : 1, e = edges(), x0 = Math.max(-600, Math.min(800, (dir < 0 ? e.l - rnd(0, 30) : e.r + rnd(0, 30)))), y0 = rnd(st[0], st[1]);
+const h = rnd(st[2], st[3]);
 const yA = MOUTH[1] - h, up = Math.sqrt(2 * (y0 - yA)) + Math.sqrt(2 * h);
 let g = gravity(), T = up / Math.sqrt(g);                      // time to reach the mouth under normal gravity
 const far = Math.abs(MOUTH[0] - x0), vmax = .16 * pace(); if (far / T > vmax) { T = Math.min(1900 / pace(), far / vmax); g = (up / T) ** 2; } // long throws on wide screens get a higher, floatier lob
 const vy = -Math.sqrt(2 * g * (y0 - yA)), vx = (MOUTH[0] - x0) / T;
-cur = { x0, y0, vx, vy, g, T, e, t0: performance.now(), x: x0, y: y0, done: false, spin: -dir * .3, wide: Math.min(2.2, Math.max(1, Math.abs(vx) / .11)) };
+cur = { x0, y0, vx, vy, g, T, e, t0: performance.now(), x: x0, y: y0, done: false, spin: -dir * rnd(.15, .5) };
 nut.setAttribute('opacity', '1'); place(x0, y0, 0); setJaw(7); whoosh();
 }
 function place(x, y, rot) { nut.setAttribute('transform', `translate(${x - MOUTH[0]} ${y - MOUTH[1]}) rotate(${rot} ${MOUTH[0]} ${MOUTH[1]})`); }
@@ -906,7 +915,8 @@ anim(hat, [{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { t
 misses++; setMisses(); flyText(msg, true);
 const a = ctx(); if (a) { const t = a.currentTime, o = a.createOscillator(), v = a.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(320, t); o.frequency.linearRampToValueAtTime(160, t + .25); v.gain.setValueAtTime(.12, t); v.gain.exponentialRampToValueAtTime(.001, t + .3); o.connect(v).connect(a.destination); o.start(t); o.stop(t + .32); }
 if (misses >= 3) return gameOver();
-say(['It got away!', 'Missed one!', 'Chomp it over his mouth!', 'So close!'][misses % 4]);
+endToss();
+say(misses === 2 ? 'Careful! One more miss this round and you\'re out.' : ['It got away!', 'Missed one!', 'So close!'][Math.random() * 3 | 0]);
 next(600);
 }
 function chomp() {
@@ -928,7 +938,7 @@ anim(stage, [{ transform: 'translate(0,0)' }, { transform: 'translate(-4px,2px)'
 hooray(combo);
 if (cracker.animate) cracker.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-6px) scale(1.02,.98)' }, { transform: 'translateY(0) scale(1)' }], { duration: 220, easing: 'ease-out' });
 if (navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
-n += perfect ? 2 : 1; misses = 0; setMisses(); const was = level(); cracked++; const sped = level() > was;
+n += perfect ? 2 : 1; const was = level(); cracked++; const sped = level() > was;
 score.textContent = n; if (score.animate) score.animate([{ transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 250, easing: 'cubic-bezier(.3,1.6,.5,1)' });
 flyText(perfect ? 'PERFECT! +2' : combo >= 3 ? `${combo} IN A ROW!` : ['CRUNCH!', 'CHOMP!', 'CRACK!', 'SNAP!'][n % 4]);
 if (perfect) { confetti(px, py, 26, 6); bell(1567.98, .5, .12); }
@@ -939,6 +949,7 @@ if (hitLine) { const [x, y] = centerOf(score); confetti(x, y, 60, 9); [1046.5, 1
 if (n >= 15) unlock.hidden = false;
 if (n > best) { best = n; try { localStorage.setItem('dgn-best', best); } catch (e) {} showBest(); }
 if (sped && level() % 4 === 0) setTimeout(() => flyText('FASTER!'), 420);
+endToss();
 next(Math.max(300, 600 - level() * 20));
 }
 function tap() {
@@ -948,18 +959,20 @@ if (now < chompUntil) return;                                  // mid-bite, no s
 chompUntil = now + 230;
 if (cur && !cur.done) {
 const t = now - cur.t0, x = cur.x0 + cur.vx * t, y = cur.y0 + cur.vy * t + .5 * cur.g * t * t;
-const d = Math.hypot((x - MOUTH[0]) / cur.wide, y - MOUTH[1]);   // faster sideways throws get a wider bite window
+const vxs = cur.vx, vys = cur.vy + cur.g * t, sp = Math.hypot(vxs, vys) || 1, ux = vxs / sp, uy = vys / sp, ox = x - MOUTH[0], oy = y - MOUTH[1];
+const k = Math.min(2.2, Math.max(1, sp / .11));               // fast nuts get a longer bite window along their path
+const d = Math.hypot((ox * ux + oy * uy) / k, ox * uy - oy * ux);
 if (d <= reach()) { chomp(); return crackNow(d); }
 }
 chomp(); clack();                                              // bit thin air
 }
 function start() {
-n = 0; misses = 0; combo = 0; cracked = 0; score.textContent = 0; eyes.dataset.lock = '1'; setMisses(); running = true; startBtn.hidden = true; unlock.hidden = true;
+n = 0; misses = 0; combo = 0; cracked = 0; round = 1; tossN = 0; setRound(); score.textContent = 0; eyes.dataset.lock = '1'; setMisses(); running = true; startBtn.hidden = true; unlock.hidden = true;
 say('Here they come!'); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); next(700);
 }
 function gameOver() {
 running = false; cancelAnimationFrame(raf); clearTimeout(gap); cur = null; setJaw(0); eyes.dataset.lock = '0';
-say(n ? `3 misses in a row! You cracked ${n}.` : '3 misses in a row! Try again.');
+say(n ? `3 misses this round! You cracked ${n}.` : '3 misses this round! Try again.');
 startBtn.textContent = 'Start over'; startBtn.hidden = false;
 if (n >= 15) unlock.hidden = false;
 }
