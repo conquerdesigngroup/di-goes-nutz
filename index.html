@@ -121,7 +121,7 @@ box-shadow:0 8px 0 rgba(0,0,0,.22);transform:rotate(var(--r,0deg))}
 .stage svg{width:100%;height:100%;overflow:visible}
 .stage::after{content:"";position:absolute;left:12%;right:12%;bottom:-8px;height:18px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(6px);z-index:-1}
 #jaw,#cracker{transform-box:view-box}
-#nut{transform-box:view-box;transform-origin:0 0}#hat{transform-box:fill-box;transform-origin:50% 100%}#gEyes,#stache{transform-box:fill-box;transform-origin:50% 50%}.stage svg{overflow:visible}
+#nut{transform-box:view-box;transform-origin:0 0}#hat{transform-box:fill-box;transform-origin:50% 100%}#armL,#armR{transform-box:fill-box;transform-origin:50% 6%}#gEyes,#stache{transform-box:fill-box;transform-origin:50% 50%}.stage svg{overflow:visible}
 .game-panel{display:grid;gap:18px;justify-items:center;text-align:center}
 .score{font-family:var(--display);font-size:clamp(64px,20vw,110px);line-height:.9;color:var(--gold);font-variant-numeric:tabular-nums}
 .score-label{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -200,16 +200,15 @@ transform-origin:0 100%;transform:scale(0);transition:transform .3s cubic-bezier
 .logo-wrap{position:relative;width:min(78vw,520px);margin-inline:auto;translate:-4% 0}
 @media (min-width:640px){.logo-wrap{width:min(84vw,520px);translate:none}}
 .logo-wrap .logo-btn{width:100%;max-width:none;z-index:2}
-.logo-wrap .buddy{position:absolute;z-index:1;width:25%;right:-6%;top:13%;rotate:14deg;transform-origin:30% 90%}
-.logo-wrap .buddy svg{-webkit-mask-image:none;mask-image:none;overflow:visible}
-.logo-wrap .buddy-say{left:58%;bottom:auto;top:-14%;transform-origin:0 100%;rotate:-14deg}
-.buddy .wave{transform-box:fill-box;transform-origin:50% 5%;animation:wave 1.6s ease-in-out infinite}
-@keyframes wave{0%,100%{transform:rotate(-178deg)}50%{transform:rotate(-138deg)}}
-.buddy .grab{transform-box:fill-box;transform-origin:50% 5%;transform:rotate(128deg)}
-.logo-wrap .grip{position:absolute;z-index:3;left:94.2%;top:30.5%;width:3.6%;aspect-ratio:1;border-radius:50%;background:#f2c2a0;box-shadow:inset -2px -2px 0 rgba(0,0,0,.12);pointer-events:none;animation:float 4.5s ease-in-out infinite}
-.logo-wrap .grip::before,.logo-wrap .grip::after{content:"";position:absolute;left:-30%;width:60%;height:24%;border-radius:999px;background:#f2c2a0;box-shadow:inset 0 -1px 0 rgba(0,0,0,.15)}
-.logo-wrap .grip::before{top:18%}.logo-wrap .grip::after{top:52%}
-.buddy.talking .wave{animation-duration:.5s}
+/* logo and nutcracker float together, he dangles from the top-right corner of the "i" */
+.logo-wrap{animation:float 4.5s ease-in-out infinite}
+.logo-wrap .logo-btn img{animation:none}
+.logo-wrap .buddy{position:absolute;z-index:3;width:24%;left:85.5%;top:21.5%}
+.logo-wrap .buddy svg{-webkit-mask-image:none;mask-image:none;overflow:visible;transform-origin:50% 4%;animation:dangle 2.8s ease-in-out infinite}
+.logo-wrap .buddy .bod{animation:none}
+.logo-wrap .buddy.talking svg{animation-duration:.9s}
+@keyframes dangle{0%,100%{rotate:7deg}50%{rotate:-5deg}}
+.logo-wrap .buddy-say{left:auto;right:70%;bottom:auto;top:-12%;border-radius:14px 14px 4px 14px;transform-origin:100% 100%}
 
 .eyes{transform-box:fill-box;transform-origin:50% 50%;transition:transform .08s}
 .blink .eyes{transform:scaleY(.12)}
@@ -363,7 +362,6 @@ html.centered .namegen{display:block}
 <button class="logo-btn" id="logoBtn" type="button" aria-label="DI Goes Nutz logo. Tap for confetti.">
 <img src="/assets/logo.webp" width="900" height="1033" alt="DI Goes Nutz">
 </button>
-<span class="grip" aria-hidden="true"></span>
 </div>
 <div class="hero-copy">
 <div class="intro">
@@ -414,19 +412,15 @@ Get Tickets
 <div class="sec-head" data-reveal>
 <span class="eyebrow">The Nutcracker's workshop</span>
 <h2 id="gameTitle">Crack <span class="red">a nut</span></h2>
-<p class="lede">Nuts get tossed up at his mouth. Tap the Nutcracker to chomp right as one flies past his mouth. Let 5 get away in a row and you start over.</p>
+<p class="lede">Walnuts get tossed up at his mouth. Tap the Nutcracker to chomp right as one flies past his mouth. Let 3 get away in a row and you start over.</p>
 </div>
 <div class="game">
 <button class="stage" id="stage" type="button" aria-label="Tap the Nutcracker to crack a nut">
 <svg viewBox="0 0 200 440" aria-hidden="true">
 <g id="cracker">
 <!-- arms -->
-<rect x="30" y="244" width="24" height="92" rx="10" fill="#c81d2b"/>
-<rect x="146" y="244" width="24" height="92" rx="10" fill="#c81d2b"/>
-<rect x="29" y="318" width="26" height="20" rx="5" fill="#141414"/>
-<rect x="145" y="318" width="26" height="20" rx="5" fill="#141414"/>
-<circle cx="42" cy="350" r="12" fill="#f2c2a0"/>
-<circle cx="158" cy="350" r="12" fill="#f2c2a0"/>
+<g id="armL"><rect x="30" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="29" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="42" cy="350" r="12" fill="#f2c2a0"/></g>
+<g id="armR"><rect x="146" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="145" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="158" cy="350" r="12" fill="#f2c2a0"/></g>
 <!-- legs -->
 <rect x="62" y="336" width="34" height="68" rx="4" fill="#f7f1ea"/>
 <rect x="104" y="336" width="34" height="68" rx="4" fill="#f7f1ea"/>
@@ -488,7 +482,7 @@ Get Tickets
 <div class="score" id="score" aria-live="polite">0</div>
 <div class="score-label">nuts cracked</div>
 </div>
-<div class="misses" id="misses" aria-label="Misses in a row: 0 of 5"><i></i><i></i><i></i><i></i><i></i></div>
+<div class="misses" id="misses" aria-label="Misses in a row: 0 of 3"><i></i><i></i><i></i></div>
 <div class="bubble" id="bubble">Ready? Chomp them mid-air.</div>
 <button class="btn" id="nutStart" type="button">Start cracking</button>
 <div class="best" id="best"></div>
@@ -841,7 +835,7 @@ tick();
 })();
 (function game() {
 const stage = $('#stage'), jaw = $('#jaw'), nut = $('#nut'), cracker = $('#cracker'), hat = $('#hat'), eyes = $('#gEyes'), stache = $('#stache'), cheeks = $('#cheeks');
-const irises = [...eyes.querySelectorAll('.iris')];
+const irises = [...eyes.querySelectorAll('.iris')], armL = $('#armL'), armR = $('#armR');
 const score = $('#score'), bubble = $('#bubble'), bestEl = $('#best'), unlock = $('#unlock'), startBtn = $('#nutStart');
 const missDots = $$('#misses i'), missBox = $('#misses');
 const MOUTH = [100, 196], FLOOR = 470;
@@ -849,9 +843,9 @@ let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, 
 try { best = +localStorage.getItem('dgn-best') || 0; } catch (e) {}
 const showBest = () => bestEl.textContent = best ? `Your best: ${best}` : ''; showBest();
 const say = (t) => { bubble.textContent = t; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); };
-const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses in a row: ${misses} of 5`); };
-// difficulty: every 2 nuts cracked the whole toss plays 6% faster, topping out at 1.9x after 30 nuts
-const level = () => Math.min(15, Math.floor(cracked / 2)), pace = () => 1 + level() * .06;
+const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses in a row: ${misses} of 3`); };
+// difficulty: every nut cracked makes the whole toss 5% faster, topping out at 2x after 20 nuts
+const level = () => Math.min(20, cracked), pace = () => 1 + level() * .05;
 const gravity = () => .00026 * pace() ** 2;                     // svg units per ms²; squared so the whole arc speeds up evenly
 // the screen's left/right edges and bottom, in the nutcracker's svg units (re-read every toss, so resize/rotation just works)
 const edges = () => { const r = stage.querySelector('svg').getBoundingClientRect(), k = r.width / 200 || 1; return { l: -r.left / k - 18, r: (innerWidth - r.left) / k + 18, b: (innerHeight - r.top) / k + 30 }; };
@@ -905,11 +899,15 @@ function next(delay) { cur = null; clearTimeout(gap); gap = setTimeout(launch, d
 function miss(msg) {
 if (!cur || cur.done) return; cur.done = true;
 nut.setAttribute('opacity', '0'); setJaw(0); combo = 0;
-anim(cracker, [{ transform: 'rotate(0)' }, { transform: 'rotate(-2deg)' }, { transform: 'rotate(2deg)' }, { transform: 'rotate(0)' }], { duration: 380 });
+// he throws his arms up in a huff
+const huff = (side) => [{ transform: 'rotate(0)' }, { transform: `rotate(${side * 160}deg)`, offset: .2 }, { transform: `rotate(${side * 140}deg)`, offset: .35 }, { transform: `rotate(${side * 165}deg)`, offset: .5 }, { transform: `rotate(${side * 140}deg)`, offset: .65 }, { transform: `rotate(${side * 160}deg)`, offset: .8 }, { transform: 'rotate(0)' }];
+anim(armL, huff(1), { duration: 900, easing: 'ease-out' }); anim(armR, huff(-1), { duration: 900, easing: 'ease-out' });
+anim(cracker, [{ transform: 'translateY(0)' }, { transform: 'translateY(-8px)', offset: .2 }, { transform: 'translateY(0)', offset: .4 }, { transform: 'translateY(-5px)', offset: .6 }, { transform: 'translateY(0)' }], { duration: 900 });
+anim(cheeks, [{ opacity: .75 }, { opacity: 1, offset: .2 }, { opacity: 1, offset: .8 }, { opacity: .75 }], { duration: 900 });
 anim(hat, [{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { transform: 'translateY(0)' }], { duration: 380 });
 misses++; setMisses(); flyText(msg, true);
 const a = ctx(); if (a) { const t = a.currentTime, o = a.createOscillator(), v = a.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(320, t); o.frequency.linearRampToValueAtTime(160, t + .25); v.gain.setValueAtTime(.12, t); v.gain.exponentialRampToValueAtTime(.001, t + .3); o.connect(v).connect(a.destination); o.start(t); o.stop(t + .32); }
-if (misses >= 5) return gameOver();
+if (misses >= 3) return gameOver();
 say(['It got away!', 'Missed one!', 'Chomp it over his mouth!', 'So close!'][misses % 4]);
 next(600);
 }
@@ -942,7 +940,7 @@ say(hitLine ? lines[hitLine] : perfect ? 'Dead centre!' : ['Crunch!', 'Nice!', '
 if (hitLine) { const [x, y] = centerOf(score); confetti(x, y, 60, 9); [1046.5, 1318.5, 1567.98].forEach((f, i) => setTimeout(() => bell(f, 1.1, .15), i * 120)); }
 if (n >= 15) unlock.hidden = false;
 if (n > best) { best = n; try { localStorage.setItem('dgn-best', best); } catch (e) {} showBest(); }
-if (sped) setTimeout(() => flyText('FASTER!'), 420);
+if (sped && level() % 4 === 0) setTimeout(() => flyText('FASTER!'), 420);
 next(Math.max(300, 600 - level() * 20));
 }
 function tap() {
@@ -963,7 +961,7 @@ say('Here they come!'); cancelAnimationFrame(raf); raf = requestAnimationFrame(f
 }
 function gameOver() {
 running = false; cancelAnimationFrame(raf); clearTimeout(gap); cur = null; setJaw(0); eyes.dataset.lock = '0';
-say(n ? `5 misses in a row! You cracked ${n}.` : '5 misses in a row! Try again.');
+say(n ? `3 misses in a row! You cracked ${n}.` : '3 misses in a row! Try again.');
 startBtn.textContent = 'Start over'; startBtn.hidden = false;
 if (n >= 15) unlock.hidden = false;
 }
@@ -973,9 +971,9 @@ startBtn.addEventListener('click', start);
 })();
 const buddySvg = $('#buddy svg');
 buddySvg.innerHTML = '<g class="bod">' + $('#cracker').innerHTML.replace(/\sid="[^"]+"/g, '') + '</g>';
+// hanging pose: long arms straight up to the ledge, drawn over his head
 buddySvg.querySelectorAll('rect[x="146"],rect[x="145"],circle[cx="158"],rect[x="30"],rect[x="29"],circle[cx="42"]').forEach(el => el.remove());
-buddySvg.querySelector('.bod').insertAdjacentHTML('beforeend', '<g class="grab"><rect x="30" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="29" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="42" cy="350" r="12" fill="#f2c2a0"/></g>');
-buddySvg.querySelector('.bod').insertAdjacentHTML('beforeend', '<g class="wave"><rect x="146" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="145" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="158" cy="350" r="12" fill="#f2c2a0"/></g>');
+buddySvg.querySelector('.bod').insertAdjacentHTML('beforeend', '<g stroke-linecap="round"><path d="M44 254L78 46" stroke="#c81d2b" stroke-width="24"/><path d="M75 64L79 42" stroke="#141414" stroke-width="27" stroke-linecap="butt"/><path d="M156 254L122 46" stroke="#c81d2b" stroke-width="24"/><path d="M125 64L121 42" stroke="#141414" stroke-width="27" stroke-linecap="butt"/></g><circle cx="80" cy="31" r="13" fill="#f2c2a0"/><circle cx="120" cy="31" r="13" fill="#f2c2a0"/>');
 (function buddy() {
 const b = $('#buddy'), say = $('#buddySay'), jaw = b.querySelector('.jaw');
 const lines = ['Psst! Tickets are going fast.', "I've gone nuts!", 'Scroll down. I crack nuts.', 'Tap the lights. They sing!', 'Bring the whole family!', 'Watch out for the Mouse King.', 'Nice mustache, right?', 'Okay okay, stop poking me.'];
