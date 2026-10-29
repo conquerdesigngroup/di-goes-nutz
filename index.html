@@ -196,6 +196,17 @@ background:radial-gradient(circle at 100% 0,rgba(227,25,47,.12),transparent 50%)
 .buddy-say{position:absolute;left:62%;bottom:94%;z-index:3;white-space:nowrap;background:var(--cream);color:var(--ink);font-family:var(--display);font-size:15px;line-height:1;padding:9px 12px;border-radius:14px 14px 14px 4px;box-shadow:0 6px 14px rgba(0,0,0,.3);
 transform-origin:0 100%;transform:scale(0);transition:transform .3s cubic-bezier(.3,1.6,.5,1)}
 .buddy-say.show{transform:scale(1)}
+/* the hero nutcracker leans out from behind the logo, waving */
+.logo-wrap{position:relative;width:min(88vw,520px);margin-inline:auto}
+.logo-wrap .logo-btn{width:100%;max-width:none;z-index:2}
+.logo-wrap .buddy{position:absolute;z-index:1;width:28%;right:2%;top:30%;rotate:24deg;transform-origin:30% 90%}
+.logo-wrap .buddy svg{-webkit-mask-image:none;mask-image:none;overflow:visible}
+.logo-wrap .buddy-say{left:58%;bottom:auto;top:-16%;transform-origin:0 100%;rotate:-24deg}
+.buddy .wave{transform-box:fill-box;transform-origin:50% 5%;animation:wave 1.6s ease-in-out infinite}
+@keyframes wave{0%,100%{transform:rotate(-178deg)}50%{transform:rotate(-138deg)}}
+@media (min-width:820px){.logo-wrap .buddy{right:-8%;top:26%;width:30%}}
+.buddy.talking .wave{animation-duration:.5s}
+
 .eyes{transform-box:fill-box;transform-origin:50% 50%;transition:transform .08s}
 .blink .eyes{transform:scaleY(.12)}
 .jaw{transform-box:view-box}
@@ -312,7 +323,8 @@ html.centered .namegen{display:block}
 html.centered .stub-main{text-align:center;justify-items:center}
 @media (min-width:820px){
 html.centered .hero-grid{grid-template-columns:1fr;gap:26px}
-html.centered .logo-btn{width:min(60vw,460px)}
+html.centered .logo-btn{width:100%}
+html.centered .logo-wrap{width:min(88vw,560px)}
 html.centered .hero-copy{justify-items:center}
 html.centered .game{grid-template-columns:1fr}
 html.centered .gifts{grid-template-columns:repeat(4,minmax(0,1fr));max-width:860px}
@@ -339,15 +351,17 @@ html.centered .namegen{display:block}
 <span class="lights-hint">tap the lights ♪</span>
 </div>
 <div class="wrap hero-grid">
-<button class="logo-btn" id="logoBtn" type="button" aria-label="DI Goes Nutz logo. Tap for confetti.">
-<img src="/assets/logo.webp" width="900" height="1033" alt="DI Goes Nutz">
-</button>
-<div class="hero-copy">
-<div class="intro">
+<div class="logo-wrap">
 <button class="buddy" id="buddy" type="button" aria-label="Nutcracker. Tap him to hear what he has to say.">
 <span class="buddy-say" id="buddySay" aria-live="polite">Psst!</span>
 <svg class="nc" viewBox="20 18 160 330" aria-hidden="true"></svg>
 </button>
+<button class="logo-btn" id="logoBtn" type="button" aria-label="DI Goes Nutz logo. Tap for confetti.">
+<img src="/assets/logo.webp" width="900" height="1033" alt="DI Goes Nutz">
+</button>
+</div>
+<div class="hero-copy">
+<div class="intro">
 <div class="intro-text">
 <p class="presents">Dancing Images presents</p>
 <p class="tagline">The Nutcracker, <em>cracked wide open.</em></p>
@@ -547,8 +561,8 @@ Get Tickets
 <div class="stub-title">DI Goes Nutz<br>Holiday Show</div>
 <dl>
 <div class="stub-row"><dt>Date</dt><dd data-cfg="dateLong">December 2026</dd></div>
-<div class="stub-row"><dt>Showtimes</dt><dd data-cfg="timesLong">Two shows</dd></div>
-<div class="stub-row"><dt>Venue</dt><dd><span data-cfg="venue">Venue</span><small data-cfg="address">Address</small></dd></div>
+<div class="stub-row"><dt>Showtime</dt><dd data-cfg="timesLong">Two shows</dd></div>
+<div class="stub-row"><dt>Venue</dt><dd><span data-cfg="venue">Venue</span><small data-cfg="address"></small></dd></div>
 </dl>
 </div>
 <div class="stub-tear" aria-hidden="true"></div>
@@ -665,16 +679,16 @@ Get Tickets
 <script>
 /* ============ EDIT SHOW DETAILS HERE ============ */
 const SHOW = {
-placeholder: true,                        // set to false once the real details below are filled in
-ticketUrl: "",                            // paste the ticket link here, e.g. "https://..."
-start: "2026-12-19T14:00:00-08:00",       // first curtain (drives the countdown)
-dateShort: "Sat · Dec 19",
-dateLong: "Saturday, December 19, 2026",
-timesShort: "2 PM & 6 PM",
-timesLong: "2:00 PM and 6:00 PM",
-cityShort: "Redlands, CA",
-venue: "Redlands East Valley High School",
-address: "31000 E Colton Ave, Redlands, CA 92374"
+placeholder: false,                       // show date and time confirmed in the 2026 packet
+ticketUrl: "",                            // paste the ticket link here when sales open
+start: "2026-12-20T17:00:00-08:00",
+dateShort: "Sun · Dec 20",
+dateLong: "Sunday, December 20, 2026",
+timesShort: "5 PM",
+timesLong: "5:00 PM · one show only",
+cityShort: "One show only",
+venue: "Theater to be announced",
+address: ""
 };
 /* ================================================ */
 document.documentElement.classList.add('js');
@@ -954,6 +968,8 @@ startBtn.addEventListener('click', start);
 })();
 const buddySvg = $('#buddy svg');
 buddySvg.innerHTML = '<g class="bod">' + $('#cracker').innerHTML.replace(/\sid="[^"]+"/g, '') + '</g>';
+buddySvg.querySelectorAll('rect[x="146"],rect[x="145"],circle[cx="158"]').forEach(el => el.remove());
+buddySvg.querySelector('.bod').insertAdjacentHTML('beforeend', '<g class="wave"><rect x="146" y="244" width="24" height="92" rx="10" fill="#c81d2b"/><rect x="145" y="318" width="26" height="20" rx="5" fill="#141414"/><circle cx="158" cy="350" r="12" fill="#f2c2a0"/></g>');
 (function buddy() {
 const b = $('#buddy'), say = $('#buddySay'), jaw = b.querySelector('.jaw');
 const lines = ['Psst! Tickets are going fast.', "I've gone nuts!", 'Scroll down. I crack nuts.', 'Tap the lights. They sing!', 'Bring the whole family!', 'Watch out for the Mouse King.', 'Nice mustache, right?', 'Okay okay, stop poking me.'];
