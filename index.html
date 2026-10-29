@@ -121,7 +121,7 @@ box-shadow:0 8px 0 rgba(0,0,0,.22);transform:rotate(var(--r,0deg))}
 .stage svg{width:100%;height:100%;overflow:visible}
 .stage::after{content:"";position:absolute;left:12%;right:12%;bottom:-8px;height:18px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(6px);z-index:-1}
 #jaw,#cracker{transform-box:view-box}
-#nut{transform-box:fill-box;transform-origin:50% 50%}
+#nut{transform-box:view-box;transform-origin:0 0}.stage svg{overflow:hidden}
 .game-panel{display:grid;gap:18px;justify-items:center;text-align:center}
 .score{font-family:var(--display);font-size:clamp(64px,20vw,110px);line-height:.9;color:var(--gold);font-variant-numeric:tabular-nums}
 .score-label{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -823,7 +823,7 @@ try { best = +localStorage.getItem('dgn-best') || 0; } catch (e) {}
 const showBest = () => bestEl.textContent = best ? `Your best: ${best}` : ''; showBest();
 const say = (t) => { bubble.textContent = t; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); };
 const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses in a row: ${misses} of 5`); };
-const flight = () => Math.max(1500, 2300 - n * 25);             // ms from toss to mouth
+const gravity = () => .00021 * (1 + Math.min(n, 30) * .02);   // svg units per ms², creeps up with score
 const reach = () => Math.max(18, 26 - n * .3);                  // how close the nut must be to get chomped
 const toScreen = (x, y) => { const r = stage.querySelector('svg').getBoundingClientRect(); return [r.left + r.width * x / 200, r.top + r.height * y / 440]; };
 const flyText = (txt, bad) => { const el = document.createElement('span'); el.className = 'flyer' + (bad ? ' bad' : ''); el.textContent = txt; el.style.left = '50%'; el.style.top = '40%'; stage.appendChild(el); setTimeout(() => el.remove(), 750); };
@@ -831,12 +831,12 @@ const setJaw = (px) => jaw.style.transform = `translateY(${px}px)`;
 // gently lob a nut in from off either side so its arc passes through the centre of the mouth
 function launch() {
 if (!running) return;
-const dir = Math.random() < .5 ? -1 : 1, x0 = 100 + dir * 122, y0 = 270 + Math.random() * 90;
-const h = 6 + Math.random() * Math.min(40, 14 + n);       // how far above the mouth the arc peaks
-const yA = MOUTH[1] - h, T = flight();
-const g = ((Math.sqrt(2 * (y0 - yA)) + Math.sqrt(2 * h)) / T) ** 2;
+const dir = Math.random() < .5 ? -1 : 1, x0 = 100 + dir * 125, y0 = 300 + Math.random() * 80;
+const h = Math.random() * Math.min(30, 4 + n);                 // the arc peaks at, or just above, the mouth
+const g = gravity(), yA = MOUTH[1] - h;
+const T = Math.sqrt(2 * (y0 - yA) / g) + Math.sqrt(2 * h / g); // time to reach the mouth
 const vy = -Math.sqrt(2 * g * (y0 - yA)), vx = (MOUTH[0] - x0) / T;
-cur = { x0, y0, vx, vy, g, t0: performance.now(), x: x0, y: y0, done: false, spin: (Math.random() < .5 ? -1 : 1) * .25 };
+cur = { x0, y0, vx, vy, g, t0: performance.now(), x: x0, y: y0, done: false, spin: -dir * .3 };
 nut.setAttribute('opacity', '1'); place(x0, y0, 0); setJaw(7);
 }
 function place(x, y, rot) { nut.setAttribute('transform', `translate(${x - MOUTH[0]} ${y - MOUTH[1]}) rotate(${rot} ${MOUTH[0]} ${MOUTH[1]})`); }
@@ -846,7 +846,7 @@ if (cur && !cur.done) {
 const t = now - cur.t0;
 cur.x = cur.x0 + cur.vx * t; cur.y = cur.y0 + cur.vy * t + .5 * cur.g * t * t;
 place(cur.x, cur.y, cur.spin * t);
-if (t > 300 && (cur.y > FLOOR || Math.abs(cur.x - 100) > 135)) miss('Missed!');
+if (t > 300 && (cur.y > FLOOR || Math.abs(cur.x - 100) > 130)) miss('Missed!');
 }
 raf = requestAnimationFrame(frame);
 }
