@@ -121,7 +121,7 @@ box-shadow:0 8px 0 rgba(0,0,0,.22);transform:rotate(var(--r,0deg))}
 .stage svg{width:100%;height:100%;overflow:visible}
 .stage::after{content:"";position:absolute;left:12%;right:12%;bottom:-8px;height:18px;border-radius:50%;background:rgba(0,0,0,.35);filter:blur(6px);z-index:-1}
 #jaw,#cracker{transform-box:view-box}
-#nut{transform-box:view-box;transform-origin:0 0}.stage svg{overflow:visible}
+#nut{transform-box:view-box;transform-origin:0 0}#hat{transform-box:fill-box;transform-origin:50% 100%}#gEyes,#stache{transform-box:fill-box;transform-origin:50% 50%}.stage svg{overflow:visible}
 .game-panel{display:grid;gap:18px;justify-items:center;text-align:center}
 .score{font-family:var(--display);font-size:clamp(64px,20vw,110px);line-height:.9;color:var(--gold);font-variant-numeric:tabular-nums}
 .score-label{font-family:var(--mono);font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
@@ -430,9 +430,8 @@ Get Tickets
 <rect x="76" y="182" width="48" height="30" rx="6" fill="#4a0c12"/>
 <!-- face -->
 <path d="M64 136h72v38a14 14 0 0 1-14 14H78a14 14 0 0 1-14-14z" fill="#f2c2a0"/>
-<circle cx="76" cy="166" r="8" fill="#f28a8a" opacity=".75"/>
-<circle cx="124" cy="166" r="8" fill="#f28a8a" opacity=".75"/>
-<g class="eyes"><ellipse cx="84" cy="152" rx="7" ry="6" fill="#fff"/><ellipse cx="116" cy="152" rx="7" ry="6" fill="#fff"/>
+<g id="cheeks" opacity=".75"><circle cx="76" cy="166" r="8" fill="#f28a8a"/><circle cx="124" cy="166" r="8" fill="#f28a8a"/></g>
+<g class="eyes" id="gEyes" data-lock="0"><ellipse cx="84" cy="152" rx="7" ry="6" fill="#fff"/><ellipse cx="116" cy="152" rx="7" ry="6" fill="#fff"/>
 <circle class="iris" data-x="85" data-y="153" cx="85" cy="153" r="3.6" fill="#2f6fd6"/><circle class="iris" data-x="117" data-y="153" cx="117" cy="153" r="3.6" fill="#2f6fd6"/></g>
 <path d="M74 143q10-6 18-1M108 142q8-5 18 1" stroke="#3b2414" stroke-width="3.4" fill="none" stroke-linecap="round"/>
 <path d="M100 150v16l-5 3" stroke="#d39a78" stroke-width="3" fill="none" stroke-linecap="round"/>
@@ -446,14 +445,16 @@ Get Tickets
 <!-- upper teeth + mustache -->
 <rect x="80" y="180" width="40" height="7" fill="#fff"/>
 <path d="M86 180v7M93 180v7M100 180v7M107 180v7M114 180v7" stroke="#d8cfc4" stroke-width="1.2"/>
-<path d="M100 172q-10-6-22 0q-8 4-14-2q4 14 18 12q12-1 18-6q6 5 18 6q14 2 18-12q-6 6-14 2q-12-6-22 0z" fill="#3b2414"/>
+<path id="stache" d="M100 172q-10-6-22 0q-8 4-14-2q4 14 18 12q12-1 18-6q6 5 18 6q14 2 18-12q-6 6-14 2q-12-6-22 0z" fill="#3b2414"/>
 <!-- hat -->
+<g id="hat">
 <rect x="62" y="40" width="76" height="90" rx="10" fill="#141414"/>
 <rect x="62" y="52" width="76" height="6" fill="#262626"/>
 <rect x="56" y="118" width="88" height="20" rx="6" fill="#f2c14e"/>
 <path d="M100 60l7 14 14-5-6 14 13 6-14 4 2 12-16-8-16 8 2-12-14-4 13-6-6-14 14 5z" fill="#f2c14e"/>
 <circle cx="100" cy="86" r="7" fill="#e3192f"/>
 <ellipse cx="100" cy="34" rx="10" ry="12" fill="#e3192f"/>
+</g>
 </g>
 <!-- nut -->
 <g id="nut" opacity="0">
@@ -695,7 +696,13 @@ try { soundOn = localStorage.getItem('dgn-sound') !== 'off'; } catch (e) {}
 const setSoundUI = () => { $('#soundLabel').textContent = soundOn ? 'Sound on' : 'Sound off'; $('#soundBtn').setAttribute('aria-pressed', soundOn); $('#soundWaves').style.opacity = soundOn ? 1 : .15; };
 setSoundUI();
 $('#soundBtn').addEventListener('click', () => { soundOn = !soundOn; setSoundUI(); try { localStorage.setItem('dgn-sound', soundOn ? 'on' : 'off'); } catch (e) {} if (soundOn) bell(1046.5, .5); });
-function ctx() { if (!soundOn) return null; if (!ac) { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state === 'suspended') ac.resume(); return ac; }
+function ctx() { if (!soundOn) return null; if (!ac || ac.state === 'closed') { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state !== 'running') { try { ac.resume(); } catch (e) {} } return ac; }
+// phones start audio paused and pause it again after tab switches, calls or locking the screen: wake it on every touch
+try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {} // lets iPhone sound play with the silent switch on
+const wakeAudio = () => { const a = ctx(); if (!a || a._unlocked) return; try { const s = a.createBufferSource(); s.buffer = a.createBuffer(1, 1, 22050); s.connect(a.destination); s.start(0); a._unlocked = true; } catch (e) {} };
+['pointerdown', 'touchend', 'keydown', 'click'].forEach(ev => addEventListener(ev, wakeAudio, { capture: true, passive: true }));
+document.addEventListener('visibilitychange', () => { if (!document.hidden && ac && ac.state !== 'running') { try { ac.resume(); } catch (e) {} } });
+addEventListener('pageshow', () => { if (ac && ac.state !== 'running') { try { ac.resume(); } catch (e) {} } });
 function bell(f, dur = 1.2, vol = .22) {
 const a = ctx(); if (!a) return; const t = a.currentTime;
 [[1, 1], [2.01, .35], [3.98, .12]].forEach(([m, g]) => {
@@ -814,11 +821,12 @@ setTimeout(tick, 1000 - Date.now() % 1000);
 tick();
 })();
 (function game() {
-const stage = $('#stage'), jaw = $('#jaw'), nut = $('#nut'), cracker = $('#cracker');
+const stage = $('#stage'), jaw = $('#jaw'), nut = $('#nut'), cracker = $('#cracker'), hat = $('#hat'), eyes = $('#gEyes'), stache = $('#stache'), cheeks = $('#cheeks');
+const irises = [...eyes.querySelectorAll('.iris')];
 const score = $('#score'), bubble = $('#bubble'), bestEl = $('#best'), unlock = $('#unlock'), startBtn = $('#nutStart');
 const missDots = $$('#misses i'), missBox = $('#misses');
 const MOUTH = [100, 196], FLOOR = 470;
-let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, chompUntil = 0;
+let n = 0, best = 0, misses = 0, running = false, cur = null, raf = 0, gap = 0, chompUntil = 0, combo = 0;
 try { best = +localStorage.getItem('dgn-best') || 0; } catch (e) {}
 const showBest = () => bestEl.textContent = best ? `Your best: ${best}` : ''; showBest();
 const say = (t) => { bubble.textContent = t; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); };
@@ -830,6 +838,25 @@ const reach = () => Math.max(18, 26 - n * .3);                  // how close the
 const toScreen = (x, y) => { const r = stage.querySelector('svg').getBoundingClientRect(); return [r.left + r.width * x / 200, r.top + r.height * y / 440]; };
 const flyText = (txt, bad) => { const el = document.createElement('span'); el.className = 'flyer' + (bad ? ' bad' : ''); el.textContent = txt; el.style.left = '50%'; el.style.top = '40%'; stage.appendChild(el); setTimeout(() => el.remove(), 750); };
 const setJaw = (px) => jaw.style.transform = `translateY(${px}px)`;
+const anim = (el, frames, o) => { if (el && el.animate) el.animate(frames, o); };
+// he keeps his eyes on the nut (svg coords)
+const watch = (x, y) => { irises.forEach(el => { const dx = x - el.dataset.x, dy = y - el.dataset.y, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 40); el.setAttribute('cx', +el.dataset.x + dx / d * 3 * k); el.setAttribute('cy', +el.dataset.y + dy / d * 2.2 * k); }); };
+function whoosh() {
+const a = ctx(); if (!a) return; const t = a.currentTime + .01;
+const o = a.createOscillator(), v = a.createGain(); o.type = 'sine'; o.frequency.setValueAtTime(260, t); o.frequency.exponentialRampToValueAtTime(720, t + .12);
+v.gain.setValueAtTime(.0001, t); v.gain.exponentialRampToValueAtTime(.14, t + .015); v.gain.exponentialRampToValueAtTime(.0001, t + .16); o.connect(v).connect(a.destination); o.start(t); o.stop(t + .18);
+const len = a.sampleRate * .5 | 0, buf = a.createBuffer(1, len, a.sampleRate), d = buf.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+const s = a.createBufferSource(); s.buffer = buf; const bp = a.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = 1.6;
+bp.frequency.setValueAtTime(450, t); bp.frequency.exponentialRampToValueAtTime(2000, t + .3); bp.frequency.exponentialRampToValueAtTime(800, t + .5);
+const g = a.createGain(); g.gain.setValueAtTime(.0001, t); g.gain.exponentialRampToValueAtTime(.08, t + .14); g.gain.exponentialRampToValueAtTime(.0001, t + .5);
+s.connect(bp).connect(g).connect(a.destination); s.start(t); s.stop(t + .5);
+}
+function clack() {
+const a = ctx(); if (!a) return; const t = a.currentTime + .005;
+[0, .05].forEach((dt, i) => { const o = a.createOscillator(), v = a.createGain(); o.type = 'square'; o.frequency.setValueAtTime(i ? 1250 : 1650, t + dt); o.frequency.exponentialRampToValueAtTime(380, t + dt + .03);
+v.gain.setValueAtTime(.06, t + dt); v.gain.exponentialRampToValueAtTime(.0001, t + dt + .035); o.connect(v).connect(a.destination); o.start(t + dt); o.stop(t + dt + .04); });
+}
+function hooray(step) { [0, 4, 7].forEach((semi, i) => setTimeout(() => bell(523.25 * 2 ** ((Math.min(step, 12) + semi) / 12), .45, .09), i * 55)); }
 // gently lob a nut in from off either side so its arc passes through the centre of the mouth
 function launch() {
 if (!running) return;
@@ -840,7 +867,7 @@ let g = gravity(), T = up / Math.sqrt(g);                      // time to reach 
 const far = Math.abs(MOUTH[0] - x0); if (far / T > .16) { T = Math.min(1900, far / .16); g = (up / T) ** 2; } // long throws on wide screens get a higher, floatier lob
 const vy = -Math.sqrt(2 * g * (y0 - yA)), vx = (MOUTH[0] - x0) / T;
 cur = { x0, y0, vx, vy, g, T, e, t0: performance.now(), x: x0, y: y0, done: false, spin: -dir * .3, wide: Math.min(2.2, Math.max(1, Math.abs(vx) / .11)) };
-nut.setAttribute('opacity', '1'); place(x0, y0, 0); setJaw(7);
+nut.setAttribute('opacity', '1'); place(x0, y0, 0); setJaw(7); whoosh();
 }
 function place(x, y, rot) { nut.setAttribute('transform', `translate(${x - MOUTH[0]} ${y - MOUTH[1]}) rotate(${rot} ${MOUTH[0]} ${MOUTH[1]})`); }
 function frame(now) {
@@ -848,7 +875,7 @@ if (!running) return;
 if (cur && !cur.done) {
 const t = now - cur.t0;
 cur.x = cur.x0 + cur.vx * t; cur.y = cur.y0 + cur.vy * t + .5 * cur.g * t * t;
-place(cur.x, cur.y, cur.spin * t);
+place(cur.x, cur.y, cur.spin * t); watch(cur.x, cur.y);
 if (t > cur.T && (cur.y > Math.max(FLOOR, cur.e.b) || cur.x < cur.e.l - 10 || cur.x > cur.e.r + 10 || t > cur.T * 3)) miss('Missed!');
 }
 raf = requestAnimationFrame(frame);
@@ -856,7 +883,9 @@ raf = requestAnimationFrame(frame);
 function next(delay) { cur = null; clearTimeout(gap); gap = setTimeout(launch, delay); }
 function miss(msg) {
 if (!cur || cur.done) return; cur.done = true;
-nut.setAttribute('opacity', '0'); setJaw(0);
+nut.setAttribute('opacity', '0'); setJaw(0); combo = 0;
+anim(cracker, [{ transform: 'rotate(0)' }, { transform: 'rotate(-2deg)' }, { transform: 'rotate(2deg)' }, { transform: 'rotate(0)' }], { duration: 380 });
+anim(hat, [{ transform: 'translateY(0)' }, { transform: 'translateY(4px)' }, { transform: 'translateY(0)' }], { duration: 380 });
 misses++; setMisses(); flyText(msg, true);
 const a = ctx(); if (a) { const t = a.currentTime, o = a.createOscillator(), v = a.createGain(); o.type = 'triangle'; o.frequency.setValueAtTime(320, t); o.frequency.linearRampToValueAtTime(160, t + .25); v.gain.setValueAtTime(.12, t); v.gain.exponentialRampToValueAtTime(.001, t + .3); o.connect(v).connect(a.destination); o.start(t); o.stop(t + .32); }
 if (misses >= 5) return gameOver();
@@ -864,18 +893,27 @@ say(['It got away!', 'Missed one!', 'Chomp it over his mouth!', 'So close!'][mis
 next(600);
 }
 function chomp() {
+anim(stache, [{ transform: 'scale(1)' }, { transform: 'scale(1.12,.9)' }, { transform: 'scale(1)' }], { duration: 160 });
 if (jaw.animate) jaw.animate([{ transform: 'translateY(22px)' }, { transform: 'translateY(-2px)' }, { transform: 'translateY(0px)' }], { duration: 130, easing: 'ease-in' });
 setJaw(cur && !cur.done ? 7 : 0);
 }
 function crackNow(d) {
 const perfect = d < 7;
 cur.done = true; nut.setAttribute('opacity', '0'); setJaw(0);
-const [px, py] = toScreen(...MOUTH); shells(px, py); crunch();
+const [px, py] = toScreen(...MOUTH); shells(px, py); crunch(); combo++;
+// juice: hat pops, eyes squeeze then go wide, cheeks flush, mustache bristles, stage shakes
+const lean = Math.random() < .5 ? -1 : 1;
+anim(hat, [{ transform: 'translateY(0) rotate(0)' }, { transform: `translateY(-26px) rotate(${lean * 9}deg)`, offset: .35 }, { transform: 'translateY(2px) rotate(0)', offset: .75 }, { transform: 'translateY(0) rotate(0)' }], { duration: 520, easing: 'ease-out' });
+anim(eyes, [{ transform: 'scale(1)' }, { transform: 'scale(1.15,.12)', offset: .2 }, { transform: 'scale(1.3)', offset: .55 }, { transform: 'scale(1)' }], { duration: 520 });
+anim(cheeks, [{ opacity: .75 }, { opacity: 1 }, { opacity: .75 }], { duration: 600 });
+anim(stache, [{ transform: 'scale(1)' }, { transform: 'scale(1.22,.8) rotate(-4deg)', offset: .3 }, { transform: 'scale(.95,1.05) rotate(3deg)', offset: .6 }, { transform: 'scale(1)' }], { duration: 420 });
+anim(stage, [{ transform: 'translate(0,0)' }, { transform: 'translate(-4px,2px)' }, { transform: 'translate(4px,-2px)' }, { transform: 'translate(-2px,1px)' }, { transform: 'translate(0,0)' }], { duration: 180 });
+hooray(combo);
 if (cracker.animate) cracker.animate([{ transform: 'translateY(0) scale(1)' }, { transform: 'translateY(-6px) scale(1.02,.98)' }, { transform: 'translateY(0) scale(1)' }], { duration: 220, easing: 'ease-out' });
 if (navigator.vibrate) try { navigator.vibrate(15); } catch (e) {}
 n += perfect ? 2 : 1; misses = 0; setMisses();
 score.textContent = n; if (score.animate) score.animate([{ transform: 'scale(1.25)' }, { transform: 'scale(1)' }], { duration: 250, easing: 'cubic-bezier(.3,1.6,.5,1)' });
-flyText(perfect ? 'PERFECT! +2' : 'CRACK!');
+flyText(perfect ? 'PERFECT! +2' : combo >= 3 ? `${combo} IN A ROW!` : ['CRUNCH!', 'CHOMP!', 'CRACK!', 'SNAP!'][n % 4]);
 if (perfect) { confetti(px, py, 26, 6); bell(1567.98, .5, .12); }
 const lines = { 10: 'Ten! The Sugar Plum Fairy approves.', 20: 'Twenty! The Mouse King is sweating.', 30: 'Thirty! You have officially gone nuts.', 50: 'Fifty?! Clara calls you a legend.' };
 const hitLine = Object.keys(lines).map(Number).find(k => n >= k && n - (perfect ? 2 : 1) < k);
@@ -895,14 +933,14 @@ const t = now - cur.t0, x = cur.x0 + cur.vx * t, y = cur.y0 + cur.vy * t + .5 * 
 const d = Math.hypot((x - MOUTH[0]) / cur.wide, y - MOUTH[1]);   // faster sideways throws get a wider bite window
 if (d <= reach()) { chomp(); return crackNow(d); }
 }
-chomp();                                                       // bit thin air
+chomp(); clack();                                              // bit thin air
 }
 function start() {
-n = 0; misses = 0; score.textContent = 0; setMisses(); running = true; startBtn.hidden = true; unlock.hidden = true;
+n = 0; misses = 0; combo = 0; score.textContent = 0; eyes.dataset.lock = '1'; setMisses(); running = true; startBtn.hidden = true; unlock.hidden = true;
 say('Here they come!'); cancelAnimationFrame(raf); raf = requestAnimationFrame(frame); next(700);
 }
 function gameOver() {
-running = false; cancelAnimationFrame(raf); clearTimeout(gap); cur = null; setJaw(0);
+running = false; cancelAnimationFrame(raf); clearTimeout(gap); cur = null; setJaw(0); eyes.dataset.lock = '0';
 say(n ? `5 misses in a row! You cracked ${n}.` : '5 misses in a row! Try again.');
 startBtn.textContent = 'Start over'; startBtn.hidden = false;
 if (n >= 15) unlock.hidden = false;
@@ -935,6 +973,7 @@ const faces = $$('.eyes').map(g => ({ g, svg: g.ownerSVGElement, irises: [...g.q
 let tx = innerWidth / 2, ty = innerHeight / 2, lastMove = 0, queued = false;
 const aim = () => { queued = false;
 for (const f of faces) {
+if (f.g.dataset.lock === '1') continue;
 const r = f.g.getBoundingClientRect(); if (r.bottom < -50 || r.top > innerHeight + 50) continue;
 const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
 const dx = tx - cx, dy = ty - cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120);
