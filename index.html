@@ -823,20 +823,20 @@ try { best = +localStorage.getItem('dgn-best') || 0; } catch (e) {}
 const showBest = () => bestEl.textContent = best ? `Your best: ${best}` : ''; showBest();
 const say = (t) => { bubble.textContent = t; bubble.classList.remove('pop'); void bubble.offsetWidth; bubble.classList.add('pop'); };
 const setMisses = () => { missDots.forEach((d, i) => d.classList.toggle('x', i < misses)); missBox.setAttribute('aria-label', `Misses in a row: ${misses} of 5`); };
-const flight = () => Math.max(560, 1300 - n * 35);             // ms from toss to mouth
-const reach = () => Math.max(13, 24 - n * .5);                  // how close the nut must be to get chomped
+const flight = () => Math.max(1500, 2300 - n * 25);             // ms from toss to mouth
+const reach = () => Math.max(18, 26 - n * .3);                  // how close the nut must be to get chomped
 const toScreen = (x, y) => { const r = stage.querySelector('svg').getBoundingClientRect(); return [r.left + r.width * x / 200, r.top + r.height * y / 440]; };
 const flyText = (txt, bad) => { const el = document.createElement('span'); el.className = 'flyer' + (bad ? ' bad' : ''); el.textContent = txt; el.style.left = '50%'; el.style.top = '40%'; stage.appendChild(el); setTimeout(() => el.remove(), 750); };
 const setJaw = (px) => jaw.style.transform = `translateY(${px}px)`;
-// toss a nut from below either side so its arc passes through the centre of the mouth
+// gently lob a nut in from off either side so its arc passes through the centre of the mouth
 function launch() {
 if (!running) return;
-const dir = Math.random() < .5 ? -1 : 1, x0 = 100 + dir * (120 + Math.random() * 50), y0 = FLOOR;
-const h = 12 + Math.random() * Math.min(90, 35 + n * 3);       // how far above the mouth the arc peaks
+const dir = Math.random() < .5 ? -1 : 1, x0 = 100 + dir * 122, y0 = 270 + Math.random() * 90;
+const h = 6 + Math.random() * Math.min(40, 14 + n);       // how far above the mouth the arc peaks
 const yA = MOUTH[1] - h, T = flight();
 const g = ((Math.sqrt(2 * (y0 - yA)) + Math.sqrt(2 * h)) / T) ** 2;
 const vy = -Math.sqrt(2 * g * (y0 - yA)), vx = (MOUTH[0] - x0) / T;
-cur = { x0, y0, vx, vy, g, t0: performance.now(), x: x0, y: y0, done: false, spin: (Math.random() < .5 ? -1 : 1) * .6 };
+cur = { x0, y0, vx, vy, g, t0: performance.now(), x: x0, y: y0, done: false, spin: (Math.random() < .5 ? -1 : 1) * .25 };
 nut.setAttribute('opacity', '1'); place(x0, y0, 0); setJaw(7);
 }
 function place(x, y, rot) { nut.setAttribute('transform', `translate(${x - MOUTH[0]} ${y - MOUTH[1]}) rotate(${rot} ${MOUTH[0]} ${MOUTH[1]})`); }
@@ -846,7 +846,7 @@ if (cur && !cur.done) {
 const t = now - cur.t0;
 cur.x = cur.x0 + cur.vx * t; cur.y = cur.y0 + cur.vy * t + .5 * cur.g * t * t;
 place(cur.x, cur.y, cur.spin * t);
-if (cur.y > FLOOR && t > 200) miss('Missed!');
+if (t > 300 && (cur.y > FLOOR || Math.abs(cur.x - 100) > 135)) miss('Missed!');
 }
 raf = requestAnimationFrame(frame);
 }
