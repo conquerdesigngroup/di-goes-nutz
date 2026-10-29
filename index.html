@@ -43,6 +43,26 @@ a{color:inherit}
 h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.02;text-wrap:balance;margin:0;letter-spacing:.01em}
 p{margin:0}
 #snow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+/* ---------- winter scene behind the hero + countdown: layered hills and pines that dolly in as you scroll ---------- */
+#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+#scene .ly{position:absolute;left:0;right:0;bottom:0;width:100%;will-change:transform;transform-origin:50% 100%}
+#scene .ly svg{position:absolute;left:0;bottom:0;width:100%;height:100%;display:block}
+#scene .sky{top:0;bottom:auto;height:60%}
+#scene .far{height:46%}
+#scene .mid{height:40%}
+#scene .near{height:30%}
+#scene .fog{height:34%;bottom:6%;opacity:.5}
+#scene .fog i{position:absolute;inset:0 -50%;background:radial-gradient(40% 50% at 30% 60%,rgba(220,238,240,.10),transparent 70%),radial-gradient(35% 45% at 75% 50%,rgba(220,238,240,.08),transparent 70%);animation:fogDrift 38s linear infinite alternate}
+#scene .side{top:auto;height:78%;width:46%}
+#scene .side.l{right:auto;transform-origin:0 100%}
+#scene .side.r{left:auto;transform-origin:100% 100%}
+#scene .twinkle{animation:twinkle 3.6s ease-in-out infinite}
+@keyframes fogDrift{to{transform:translateX(18%)}}
+@keyframes twinkle{0%,100%{opacity:.25}50%{opacity:.9}}
+@keyframes rise{from{translate:0 14%;opacity:0}}
+html.js #scene .ly{animation:rise 1.6s cubic-bezier(.2,.8,.2,1) both}
+html.js #scene .far{animation-delay:.1s}html.js #scene .mid{animation-delay:.25s}html.js #scene .near{animation-delay:.4s}html.js #scene .side{animation-delay:.55s}
+@media (prefers-reduced-motion:reduce){#scene .fog i,#scene .twinkle,html.js #scene .ly{animation:none}}
 #fx{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none}
 main{position:relative;z-index:1;overflow-x:clip}
 html,body{overflow-x:clip}
@@ -337,6 +357,7 @@ html.centered .namegen{display:block}
 </style>
 </head>
 <body>
+<div id="scene" aria-hidden="true"></div>
 <canvas id="snow" aria-hidden="true"></canvas>
 <canvas id="fx" aria-hidden="true"></canvas>
 <main>
@@ -734,6 +755,55 @@ const g = a.createGain(); g.gain.value = .9; n.connect(bp).connect(g).connect(a.
 const o = a.createOscillator(), v = a.createGain(); o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(60, t + .1);
 v.gain.setValueAtTime(.35, t); v.gain.exponentialRampToValueAtTime(.001, t + .12); o.connect(v).connect(a.destination); o.start(t); o.stop(t + .14);
 }
+(function scene() {
+const root = $('#scene'), stop = $('.workshop'); if (!root || !stop) return;
+let seed = 7; const rnd = (a = 0, b = 1) => { seed = (seed * 16807) % 2147483647; return a + (b - a) * (seed / 2147483647); };
+const W = 1600;
+// one snowy pine: stacked tiers, each with a snow lip
+const pine = (x, base, h, fill, snow) => {
+const w = h * .46; let d = '', s = '';
+[[0, 1], [.28, .78], [.52, .56]].forEach(([o, k]) => { const top = base - h * (o + .48), bot = base - h * o * .92, ww = w * k;
+d += `M${x} ${top}L${x + ww} ${bot}L${x - ww} ${bot}Z`;
+s += `M${x} ${top}L${x + ww * .42} ${top + (bot - top) * .42}Q${x} ${top + (bot - top) * .5} ${x - ww * .42} ${top + (bot - top) * .42}Z`; });
+return `<path d="${d}" fill="${fill}"/><rect x="${x - h * .035}" y="${base - h * .04}" width="${h * .07}" height="${h * .09}" fill="${fill}"/><path d="${s}" fill="${snow}"/>`;
+};
+// rolling ridge line across the layer
+const ridge = (H, y, amp, n) => { let p = `M0 ${H}L0 ${y}`; const pts = []; for (let i = 0; i <= n; i++) { const x = i / n * W, yy = y + Math.sin(i * 1.7 + rnd(0, 3)) * amp * rnd(.4, 1); pts.push([x, yy]); }
+for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i]; p += `C${x0 + (x1 - x0) / 2} ${y0} ${x0 + (x1 - x0) / 2} ${y1} ${x1} ${y1}`; } return { d: p + `L${W} ${H}Z`, pts }; };
+const yAt = (pts, x) => { for (let i = 1; i < pts.length; i++) if (pts[i][0] >= x) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], t = (x - x0) / (x1 - x0), e = t * t * (3 - 2 * t); return y0 + (y1 - y0) * e; } return pts[pts.length - 1][1]; };
+const layer = (cls, H, y, amp, n, top, bot, rim, trees) => {
+const r = ridge(H, y, amp, n); let t = '';
+for (let i = 0; i < trees.count; i++) { const x = rnd(0, W), h = rnd(trees.min, trees.max); t += pine(x, yAt(r.pts, x) + h * .06, h, trees.fill, trees.snow); }
+return `<div class="ly ${cls}"><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice"><defs><linearGradient id="g-${cls}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${top}"/><stop offset="1" stop-color="${bot}"/></linearGradient></defs>${t}<path d="${r.d}" fill="url(#g-${cls})"/><path d="${r.d.replace(/L1600 \d+(\.\d+)?Z$/, '').replace(/^M0 \d+(\.\d+)?L/, 'M')}" fill="none" stroke="${rim}" stroke-width="3" opacity=".7"/></svg></div>`;
+};
+const mx = innerWidth < 700 ? 905 : 1180; // keep the moon on screen on narrow phones
+let stars = ''; for (let i = 0; i < 46; i++) stars += `<circle class="${i % 3 ? '' : 'twinkle'}" style="animation-delay:${rnd(0, 3.6).toFixed(2)}s" cx="${rnd(0, W)}" cy="${rnd(10, 430)}" r="${rnd(.8, 2.2)}" fill="#fff3df" opacity="${rnd(.25, .7).toFixed(2)}"/>`;
+const sky = `<div class="ly sky"><svg viewBox="0 0 ${W} 520" preserveAspectRatio="xMidYMin slice"><defs><radialGradient id="moonGlow"><stop offset="0" stop-color="#fff3df" stop-opacity=".35"/><stop offset="1" stop-color="#fff3df" stop-opacity="0"/></radialGradient></defs>${stars}<circle cx="${mx}" cy="150" r="170" fill="url(#moonGlow)"/><circle cx="${mx}" cy="150" r="52" fill="#f7ecd4"/><circle cx="${mx - 18}" cy="138" r="9" fill="#e6d8b8"/><circle cx="${mx + 16}" cy="168" r="6" fill="#e6d8b8"/></svg></div>`;
+const far = layer('far', 520, 300, 46, 7, '#2f5f5b', '#123a2b', 'rgba(230,242,244,.35)', { count: 70, min: 16, max: 34, fill: '#163f30', snow: 'rgba(230,242,244,.5)' });
+const mid = layer('mid', 460, 230, 40, 6, '#3b6e67', '#0f3325', 'rgba(235,246,248,.45)', { count: 44, min: 44, max: 90, fill: '#0e3426', snow: 'rgba(230,242,244,.55)' });
+const near = layer('near', 360, 140, 26, 5, '#2f5c55', '#0a291d', 'rgba(240,248,250,.7)', { count: 16, min: 110, max: 190, fill: '#08261a', snow: 'rgba(225,238,240,.5)' });
+// big foreground pines framing each edge; these sweep past you
+const side = (cls, xs) => { let t = ''; xs.forEach(([x, h]) => t += pine(x, 700, h, '#041a10', 'rgba(225,238,240,.6)')); return `<div class="ly side ${cls}"><svg viewBox="0 0 400 700" preserveAspectRatio="x${cls === 'l' ? 'Min' : 'Max'}YMax meet">${t}</svg></div>`; };
+root.innerHTML = sky + far + `<div class="ly fog"><i></i></div>` + mid + near + side('l', [[40, 560], [190, 360], [-60, 640]]) + side('r', [[360, 600], [220, 380], [470, 660]]);
+const L = { sky: root.querySelector('.sky'), far: root.querySelector('.far'), mid: root.querySelector('.mid'), near: root.querySelector('.near'), l: root.querySelector('.side.l'), r: root.querySelector('.side.r'), fog: root.querySelector('.fog') };
+if (reduce) return;
+let q = false;
+const ease = t => 1 - Math.pow(1 - t, 2);
+const update = () => { q = false;
+const vh = innerHeight, end = Math.max(1, stop.offsetTop - vh * .35), p = ease(Math.min(1, Math.max(0, scrollY / end)));
+const top = stop.getBoundingClientRect().top, fade = Math.min(1, Math.max(0, (top - vh * .3) / (vh * .6))), late = 1 - Math.max(0, (p - .55) / .45) * .85;
+root.style.opacity = fade; root.style.visibility = fade < .01 ? 'hidden' : 'visible'; if (fade < .01) return;
+L.sky.style.transform = `translate3d(0,${p * vh * .1}px,0)`;
+L.far.style.transform = `translate3d(0,${p * vh * .02}px,0) scale(${1 + p * .08})`;
+L.fog.style.transform = `translate3d(0,${p * vh * .05}px,0) scale(${1 + p * .3})`;
+L.mid.style.transform = `translate3d(0,${p * vh * .06}px,0) scale(${1 + p * .3})`;
+L.near.style.transform = `translate3d(0,${p * vh * .16}px,0) scale(${1 + p * .75})`; L.near.style.opacity = late; L.l.style.opacity = L.r.style.opacity = late;
+L.l.style.transform = `translate3d(${-p * 42}vw,${p * vh * .12}px,0) scale(${1 + p * 1.1})`;
+L.r.style.transform = `translate3d(${p * 42}vw,${p * vh * .12}px,0) scale(${1 + p * 1.1})`;
+};
+const kick = () => { if (!q) { q = true; requestAnimationFrame(update); } };
+addEventListener('scroll', kick, { passive: true }); addEventListener('resize', kick); kick();
+})();
 const sc = $('#snow'), sx = sc.getContext('2d'); let flakes = [], W = 0, H = 0, dpr = 1;
 function sizeSnow() {
 dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight;
