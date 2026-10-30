@@ -1,1 +1,1 @@
-{"rewrites":[{"source":"/centered","destination":"/index.html"},{"source":"/original","destination":"/index.html"},{"source":"/door","destination":"/door.html"}]}
+{"rewrites": [{"source": "/centered", "destination": "/index.html"}, {"source": "/original", "destination": "/index.html"}, {"source": "/door", "destination": "/door.html"}], "crons": [{"path": "/api/cron-backfill", "schedule": "0 17 * * *"}]}
