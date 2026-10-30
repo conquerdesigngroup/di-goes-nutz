@@ -38,6 +38,14 @@ button.ghost{background:transparent;color:var(--muted);border:1px solid var(--mu
 .msg{margin-top:12px;padding:12px 14px;border-radius:12px;font-weight:600}
 .msg.good{background:var(--holly)}.msg.err{background:var(--berry)}
 #gate{margin-top:30px}
+.listbar{display:flex;gap:8px;flex-wrap:wrap;margin:-4px 0 12px}
+.guests{width:100%;border-collapse:collapse;margin-top:12px;background:var(--cream);color:var(--ink);border-radius:14px;overflow:hidden;font-size:14px}
+.guests th{background:var(--fir);color:var(--gold);text-align:left;padding:10px;font-size:12px;letter-spacing:.06em}
+.guests td{padding:10px;border-top:1px solid #e8dcc6;vertical-align:top}
+.guests tr.g{cursor:pointer}.guests tr.g:hover td{background:#fbe9c4}
+.guests .codes{font:700 13px "Space Mono",monospace}
+.guests .sm{color:#555;font-size:12px}
+.guests .ref td{color:var(--berry)}
 [hidden]{display:none!important}
 </style>
 </head>
@@ -59,6 +67,7 @@ button.ghost{background:transparent;color:var(--muted);border:1px solid var(--mu
     </div>
     <form id="searchForm"><input id="q" placeholder="Ticket number or name" autocomplete="off" autocapitalize="characters"><button>Find</button></form>
     <p class="hint">Type the ticket number (the part after NUTZ- is enough) or the buyer's name or email.</p>
+    <div class="listbar"><button class="ghost" id="showList">Guest list</button><button class="ghost" id="csv">Download list (CSV)</button></div>
     <div id="msg"></div>
     <div id="results"></div>
     <p style="margin-top:28px;display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="backfill">Find missed sales in Square</button><button class="ghost" id="lock">Lock this device</button></p>
@@ -146,6 +155,48 @@ function lock() {
   $("gate").hidden = false; $("app").hidden = true;
 }
 $("lock").addEventListener("click", lock);
+
+// Guest list: one row per order, so staff can find a buyer who can't find their email.
+function groupOrders(tickets) {
+  const orders = new Map();
+  for (const t of tickets) {
+    const o = orders.get(t.payment_id) || { name: t.buyer_name, email: t.buyer_email, tickets: [] };
+    o.tickets.push(t);
+    orders.set(t.payment_id, o);
+  }
+  return [...orders.values()];
+}
+$("showList").addEventListener("click", async () => {
+  show("");
+  const { tickets } = await api("list");
+  if (!tickets.length) { $("results").innerHTML = ""; return show("No tickets sold yet.", false); }
+  const rows = groupOrders(tickets).map((o) => {
+    const valid = o.tickets.filter((t) => t.status === "valid");
+    const inCount = valid.filter((t) => t.checked_in_at).length;
+    const refunded = !valid.length;
+    return `<tr class="g${refunded ? " ref" : ""}" data-q="${esc(o.tickets[0].code)}" data-email="${esc(o.email || "")}">
+      <td><b>${esc(o.name || "No name")}</b><div class="sm">${esc(o.email || "")}</div></td>
+      <td class="codes">${o.tickets.map((t) => esc(t.code)).join("<br>")}</td>
+      <td>${refunded ? "Refunded" : `${inCount} of ${valid.length} in`}</td></tr>`;
+  }).join("");
+  last = [];
+  $("results").innerHTML = `<table class="guests"><thead><tr><th>BUYER</th><th>TICKETS</th><th>CHECKED IN</th></tr></thead><tbody>${rows}</tbody></table>
+    <p class="hint">${tickets.length} tickets · tap a buyer to check them in or resend their email.</p>`;
+});
+$("results").addEventListener("click", (e) => {
+  const row = e.target.closest("tr.g");
+  if (row) { const q = row.dataset.email || row.dataset.q; $("q").value = q; search(q).catch((err) => show(err.message)); }
+});
+$("csv").addEventListener("click", async () => {
+  const { tickets } = await api("list");
+  const cell = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const lines = [["Ticket", "Name", "Email", "Ticket of order", "Status", "Checked in", "Bought"].map(cell).join(",")];
+  for (const t of tickets) lines.push([t.code, t.buyer_name, t.buyer_email, `${t.seat_no} of ${t.seats_in_order}`, t.status, t.checked_in_at ? new Date(t.checked_in_at).toLocaleString() : "", new Date(t.created_at).toLocaleString()].map(cell).join(","));
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(new Blob([lines.join("\n")], { type: "text/csv" }));
+  a.download = "di-goes-nutz-guest-list.csv";
+  a.click();
+});
 $("backfill").addEventListener("click", async (e) => {
   e.target.disabled = true;
   show("Checking Square for ticket sales without tickets…", true);
