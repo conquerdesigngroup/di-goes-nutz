@@ -1,6 +1,6 @@
 // Door check-in API, protected by the DOOR_PIN environment variable.
 import crypto from "node:crypto";
-import { sql, normalizeCode, issueTickets, emailPending } from "../lib/tickets.js";
+import { sql, normalizeCode, issueTickets, emailPending, backfill } from "../lib/tickets.js";
 
 function pinOk(pin) {
   const want = process.env.DOOR_PIN || "";
@@ -55,6 +55,12 @@ export default async function handler(req, res) {
     case "issue": {
       // Backfill for a purchase made before the webhook was connected.
       return res.json(await issueTickets(String(body.paymentId || "")));
+    }
+    case "backfill": {
+      // Picks up ticket sales Square never delivered to the webhook. Already-issued orders are left alone.
+      const since = body.since || "2026-10-01T00:00:00Z";
+      const done = await backfill(since);
+      return res.json({ orders: done.length, emailed: done.reduce((n, r) => n + (r.emailed || 0), 0) });
     }
     default:
       return res.status(400).json({ error: "Unknown action" });

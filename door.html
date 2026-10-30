@@ -61,7 +61,7 @@ button.ghost{background:transparent;color:var(--muted);border:1px solid var(--mu
     <p class="hint">Type the ticket number (the part after NUTZ- is enough) or the buyer's name or email.</p>
     <div id="msg"></div>
     <div id="results"></div>
-    <p style="margin-top:28px"><button class="ghost" id="lock">Lock this device</button></p>
+    <p style="margin-top:28px;display:flex;gap:8px;flex-wrap:wrap"><button class="ghost" id="backfill">Find missed sales in Square</button><button class="ghost" id="lock">Lock this device</button></p>
   </section>
 </main>
 <script>
@@ -146,6 +146,16 @@ function lock() {
   $("gate").hidden = false; $("app").hidden = true;
 }
 $("lock").addEventListener("click", lock);
+$("backfill").addEventListener("click", async (e) => {
+  e.target.disabled = true;
+  show("Checking Square for ticket sales without tickets…", true);
+  try {
+    const r = await api("backfill");
+    show(r.ok ? (r.emailed ? `Sent tickets for ${r.orders} order(s) that were missing them.` : "Every ticket sale already has its tickets.") : r.error, r.ok);
+  } catch (err) { show(err.message); }
+  e.target.disabled = false;
+  stats();
+});
 
 if (pin) stats().then(unlock).catch(() => {});
 setInterval(() => { if (pin && !$("app").hidden) stats().catch(() => {}); }, 30000);

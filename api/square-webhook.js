@@ -12,6 +12,14 @@ export default async function handler(req, res) {
   if (req.method !== "POST") return res.status(405).send("POST only");
   const raw = await readRaw(req);
   if (!validSquareSignature(raw, req.headers["x-square-hmacsha256-signature"])) {
+    let type = "unknown";
+    try { type = JSON.parse(raw).type; } catch {}
+    console.warn("rejected webhook: bad signature", JSON.stringify({
+      type,
+      host: req.headers.host,
+      hasSignature: Boolean(req.headers["x-square-hmacsha256-signature"]),
+      hasKey: Boolean(process.env.SQUARE_WEBHOOK_SIGNATURE_KEY),
+    }));
     return res.status(401).send("bad signature");
   }
   const event = JSON.parse(raw);
