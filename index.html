@@ -71,7 +71,11 @@ p{margin:0}
 #scene .shoot{position:absolute;top:0;left:0;width:140px;height:2px;border-radius:2px;background:linear-gradient(90deg,rgba(255,243,223,0),#fff3df);opacity:0;rotate:-24deg;animation:shoot 9s linear infinite}
 #scene .shoot:nth-child(2){animation-delay:4.6s;animation-duration:12s}
 @keyframes shoot{0%,88%{opacity:0;translate:var(--sx) var(--sy)}90%{opacity:1}100%{opacity:0;translate:calc(var(--sx) - 340px) calc(var(--sy) + 150px)}}
-#scene .ly svg.sleigh{position:absolute;left:0;top:0;bottom:auto;width:clamp(90px,14vw,170px);height:auto;will-change:transform;opacity:0}
+#scene .ly svg.sleigh{position:absolute;left:0;top:0;bottom:auto;width:clamp(170px,26vw,330px);height:auto;will-change:transform;opacity:0}
+
+#scene .ly svg.dbox{left:0;top:0;bottom:auto;width:0;height:0;will-change:transform}
+#scene .sleigh.fly .rd{animation:gallop .9s ease-in-out infinite}#scene .rd{transform-box:fill-box;transform-origin:50% 50%}#scene .sleigh.fly .tw{animation:twinkle 1.4s ease-in-out infinite}@media (pointer:coarse){#scene .sleigh.fly .tw{animation:none}}
+@keyframes gallop{50%{transform:translateY(-2.5px) rotate(-3deg)}}
 @keyframes fogDrift{to{transform:translateX(18%)}}
 @keyframes twinkle{0%,100%{opacity:.25}50%{opacity:.9}}
 @keyframes rise{from{translate:0 14%;opacity:0}}
@@ -326,7 +330,14 @@ transition:filter .12s,transform .12s;box-shadow:inset 0 -8px 14px rgba(0,0,0,.2
 .nt-name.spinning{color:#9aa79f;filter:blur(.6px)}
 .nt-name.land{animation:pop .4s cubic-bezier(.3,1.7,.6,1)}
 .nt-copy{display:block;margin:0 auto 16px;border:0;background:none;font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--berry);text-decoration:underline;text-underline-offset:3px;padding:8px}
-.finale{text-align:center;padding-block:96px 140px;background:radial-gradient(90% 60% at 50% 100%,rgba(227,25,47,.35),transparent 70%)}
+.finale{position:relative;overflow:hidden;text-align:center;padding-block:96px calc(clamp(290px,34vw,440px) + 10px);background:radial-gradient(90% 60% at 50% 100%,rgba(227,25,47,.35),transparent 70%)}
+.town{position:absolute;left:0;right:0;bottom:0;height:clamp(290px,34vw,440px);pointer-events:none}
+.town .tl{position:absolute;inset:0}
+.town.live .tl{will-change:transform}
+.town svg{position:absolute;left:0;bottom:0;width:100%;height:100%;display:block;overflow:visible}
+/* the town only animates while it's on screen, so it costs nothing while you scroll the top of the page */
+.town.live .win{animation:flick 5s ease-in-out infinite}
+.town.live .bulb{animation:twinkle 1.8s ease-in-out infinite}
 .finale h2{font-size:clamp(48px,14vw,96px);margin-bottom:18px}
 .finale h2 span{display:inline-block;color:var(--candy);animation:bob 1.6s ease-in-out infinite}
 @keyframes bob{50%{transform:translateY(-8px) rotate(-3deg)}}
@@ -446,6 +457,21 @@ Get Tickets
 </div>
 </div>
 </div>
+<!-- COUNTDOWN -->
+<section class="band countdown" id="countdown" aria-labelledby="cdTitle">
+<div class="wrap" data-reveal>
+<div class="sec-head">
+<span class="eyebrow">Curtain up in <span class="sample" data-sample hidden>sample date</span></span>
+<h2 id="cdTitle">Almost <span class="red">showtime</span></h2>
+</div>
+<div class="tags" id="tags" role="timer" aria-live="off">
+<div class="tag"><b id="cdD">00</b><small>days</small></div>
+<div class="tag"><b id="cdH">00</b><small>hours</small></div>
+<div class="tag"><b id="cdM">00</b><small>mins</small></div>
+<div class="tag"><b id="cdS">00</b><small>secs</small></div>
+</div>
+</div>
+</section>
 <!-- GAMES: one picker for every mini game -->
 <section class="band arcade" id="games" aria-labelledby="arcadeTitle">
 <div class="wrap">
@@ -637,21 +663,6 @@ Get Tickets
 </div>
 </div>
 </section>
-<!-- COUNTDOWN -->
-<section class="band countdown" aria-labelledby="cdTitle">
-<div class="wrap" data-reveal>
-<div class="sec-head">
-<span class="eyebrow">Curtain up in <span class="sample" data-sample hidden>sample date</span></span>
-<h2 id="cdTitle">Almost <span class="red">showtime</span></h2>
-</div>
-<div class="tags" id="tags" role="timer" aria-live="off">
-<div class="tag"><b id="cdD">00</b><small>days</small></div>
-<div class="tag"><b id="cdH">00</b><small>hours</small></div>
-<div class="tag"><b id="cdM">00</b><small>mins</small></div>
-<div class="tag"><b id="cdS">00</b><small>secs</small></div>
-</div>
-</div>
-</section>
 <!-- GIFTS -->
 <section class="band" aria-labelledby="giftTitle">
 <div class="wrap">
@@ -710,21 +721,6 @@ Get Tickets
 </article>
 </div>
 </section>
-<!-- CAST -->
-<section class="band" aria-labelledby="castTitle">
-<div class="wrap duo">
-<figure class="polaroid" data-reveal style="margin:0">
-<span class="tape" aria-hidden="true"></span>
-<img src="/assets/cast-2026.webp" width="900" height="1165" alt="DI Goes Nutz Cast 2026 graphic" loading="lazy">
-<figcaption>Cast 2026</figcaption>
-</figure>
-<div class="duo-copy" data-reveal>
-<span class="eyebrow">Starring</span>
-<h2>Our dancers, <span style="color:var(--candy)">going nuts</span></h2>
-<p class="lede">The 2026 cast has been rehearsing since auditions in August. From our tiniest ballerinas to our senior company, they're ready to bring the house down. Come cheer them on.</p>
-</div>
-</div>
-</section>
 <!-- FINALE -->
 <section class="band finale" aria-labelledby="finTitle">
 <div class="wrap">
@@ -732,6 +728,7 @@ Get Tickets
 <p class="lede">Seats go fast once the snow starts falling. Bring grandma, bring the neighbors, bring the whole sleigh.</p>
 <a class="btn big" data-ticket href="#tickets" id="finalCta">Get Tickets</a>
 </div>
+<div class="town" id="town" aria-hidden="true"></div>
 </section>
 </main>
 <footer>
@@ -814,7 +811,7 @@ els.forEach(el => { el.style.opacity = (1 - e).toFixed(3); el.style.transform = 
 addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(run); } }, { passive: true }); run();
 })();
 (function scene() {
-const root = $('#scene'), stop = $('#games'); if (!root || !stop) return;
+const root = $('#scene'), stop = $('#countdown'); if (!root || !stop) return;
 let seed = 7; const rnd = (a = 0, b = 1) => { seed = (seed * 16807) % 2147483647; return a + (b - a) * (seed / 2147483647); };
 const W = 1600;
 // one snowy pine: stacked tiers, each with a snow lip
@@ -844,7 +841,37 @@ const mid = layer('mid', 460, 230, 40, 6, '#3b6e67', '#0f3325', 'rgba(235,246,24
 const near = layer('near', 360, 140, 26, 5, '#2f5c55', '#0a291d', 'rgba(240,248,250,.7)', { count: 16, min: 110, max: 190, fill: '#08261a', snow: 'rgba(225,238,240,.5)', lights: .35 });
 // big foreground pines framing each edge; these sweep past you
 const side = (cls, xs) => { let t = ''; xs.forEach(([x, h]) => t += pine(x, 700, h, '#041a10', 'rgba(225,238,240,.6)')); return `<div class="ly side ${cls}"><svg viewBox="0 0 400 700" preserveAspectRatio="x${cls === 'l' ? 'Min' : 'Max'}YMax meet">${t}</svg></div>`; };
-const sleigh = `<svg class="sleigh" viewBox="0 0 150 50"><g fill="#061a12"><path d="M96 26h34q8 0 10-8h4q-2 14-14 14h-34z"/><path d="M100 32q-4 8 4 10h40" stroke="#061a12" stroke-width="2.5" fill="none"/><circle cx="120" cy="18" r="6"/><path d="M6 24q6-4 14-2l10-6 2 3-6 6q14 0 18 4l-4 10-3-1 2-7q-8 2-16 0l-4 8-3-1 3-9q-6-2-13-5z"/><path d="M48 22q6-4 14-2l10-6 2 3-6 6q14 0 18 4l-4 10-3-1 2-7q-8 2-16 0l-4 8-3-1 3-9q-6-2-13-5z"/><path d="M18 18l-3-8M22 17l2-8M60 16l-3-8M64 15l2-8" stroke="#061a12" stroke-width="2"/></g><path d="M30 30L96 30" stroke="#061a12" stroke-width="1.4"/></svg>`;
+const sleigh = (() => {
+const deer = (x, y, d, nose) => `<g transform="translate(${x} ${y})"><g class="rd" style="animation-delay:${d}s">
+<path class="lg b" d="M15 1C21 5 27 8 35 9M12 3C18 8 24 12 32 14" stroke="#3b2316" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+<path class="lg f" d="M-14 2C-20 5 -27 3 -34 -2M-11 3C-17 7 -24 7 -31 4" stroke="#3b2316" stroke-width="2.6" fill="none" stroke-linecap="round"/>
+<path d="M-18 -1C-20 -10 -6 -13 6 -11C16 -10 22 -7 22 -1C22 5 13 6 3 6C-8 7 -17 6 -18 -1Z" fill="#7a4a2c"/>
+<path d="M-15 2C-6 6 8 6 18 2C14 6 4 7 -6 6C-11 5 -14 4 -15 2Z" fill="#c9a07a"/>
+<path d="M21 -5C25 -10 28 -9 26 -5Z" fill="#efe4d4"/>
+<path d="M-14 -5C-18 -13 -22 -19 -26 -23L-20 -26C-17 -21 -12 -14 -8 -9Z" fill="#7a4a2c"/>
+<path d="M-26 -23C-29 -27 -35 -27 -38 -23.5C-39.6 -21.4 -37.6 -20 -34.6 -20.4C-31.6 -20.8 -28.6 -20.6 -25.4 -19.4Z" fill="#7a4a2c"/>
+<circle cx="-31" cy="-23.4" r=".9" fill="#1a0d06"/><path d="M-24 -24.4L-19.6 -28.4L-22 -22.6Z" fill="#5a331d"/>
+<path d="M-25.6 -26C-25 -32 -21 -37 -15 -39M-21.6 -33.4L-24.4 -38.6M-18.4 -36.8L-18 -42.4M-23.6 -25.4C-21 -30 -17 -32 -12 -32.6M-16.6 -31.6L-16 -36" stroke="#e8d3ad" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+<path d="M-17 -8.6C-14 -4 -13 1 -14 4" stroke="#b3122a" stroke-width="2.4" fill="none"/><circle cx="-14.4" cy="-1" r="1.5" fill="#f2c14e"/><circle cx="-13.6" cy="3" r="1.5" fill="#f2c14e"/>
+${nose ? '<circle cx="-38.8" cy="-22" r="7" fill="url(#noseGlow)"/><circle cx="-38.8" cy="-22" r="2" fill="#ff3b3b"/>' : '<circle cx="-38.6" cy="-22.2" r="1.2" fill="#2a160c"/>'}
+</g></g>`;
+let stars = ''; for (let i = 0; i < 9; i++) stars += `<circle class="tw" style="animation-delay:${(i * .23).toFixed(2)}s" cx="${300 + i * 15 + (i % 2) * 5}" cy="${52 + i * 3.4 + (i % 3) * 3}" r="${(1.6 - i * .12).toFixed(2)}" fill="#ffe7a3"/>`;
+return `<svg class="sleigh" viewBox="0 -12 330 104"><defs><radialGradient id="noseGlow"><stop offset="0" stop-color="#ff5a4a" stop-opacity=".8"/><stop offset="1" stop-color="#ff5a4a" stop-opacity="0"/></radialGradient><radialGradient id="sleighGlow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".22"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient><linearGradient id="trail" x1="0" x2="1"><stop offset="0" stop-color="#ffe7a3" stop-opacity=".55"/><stop offset="1" stop-color="#ffe7a3" stop-opacity="0"/></linearGradient><linearGradient id="sleighBody" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d81e36"/><stop offset="1" stop-color="#8e0c22"/></linearGradient></defs>
+<ellipse cx="240" cy="44" rx="70" ry="36" fill="url(#sleighGlow)"/>
+<path d="M290 60C320 64 350 72 400 82L400 83.6C350 75 318 67.6 288 64Z" fill="url(#trail)"/>${stars}
+<path d="M226 22C200 26 170 30 145 34C110 38 75 38 40 34" stroke="#f2c14e" stroke-width=".9" fill="none" opacity=".85"/>
+<path d="M226 23C198 30 172 36 145 38" stroke="#f2c14e" stroke-width=".9" fill="none" opacity=".85"/>
+${deer(52, 40, 0, 1)}${deer(108, 46, -.18, 0)}${deer(160, 42, -.36, 0)}
+<path d="M208 72H272C284 72 292 66 292 57" stroke="#f2c14e" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M208 72C196 72 194 62 202 61C206 61 207 65 204 66" stroke="#f2c14e" stroke-width="2.6" fill="none" stroke-linecap="round"/><path d="M222 62V72M260 62V72" stroke="#f2c14e" stroke-width="2"/>
+<g class="santa"><path d="M262 38C258 24 266 14 278 14C286 16 290 26 286 38Z" fill="#2f6b3c"/><rect x="266" y="12" width="9" height="9" rx="1.4" fill="#e3192f" transform="rotate(-12 270 16)"/><rect x="276" y="10" width="8" height="8" rx="1.4" fill="#3fb6ff" transform="rotate(10 280 14)"/><path d="M267 13.6L274 12.2M279 10.4V18" stroke="#f2c14e" stroke-width="1.2"/>
+<path d="M232 40C230 26 236 18 246 18C255 18 259 28 258 40Z" fill="#c8102e"/><path d="M246 18V40" stroke="#fff4ea" stroke-width="2.4"/><rect x="231.6" y="34" width="27" height="3.6" fill="#1a120c"/><rect x="243.6" y="33.2" width="5" height="5.2" fill="none" stroke="#f2c14e" stroke-width="1.2"/>
+<path d="M236 24C230 26 226 26 222 23" stroke="#c8102e" stroke-width="4.4" fill="none" stroke-linecap="round"/><circle cx="221.6" cy="22.6" r="2.4" fill="#1a120c"/>
+<circle cx="241" cy="11" r="5.6" fill="#f6d2b5"/><path d="M235 12C234 20 240 24 245 21C247 18 247 14 246 12C243 15 238 15 235 12Z" fill="#fff8ef"/><path d="M235.8 12.2Q238.6 10.4 241.6 12.4" stroke="#fff8ef" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="236" cy="9.6" r="1.1" fill="#e8848a"/>
+<path d="M235.4 6.6C238 -1 247 -2 252 3C254 6 256 9 258 8" stroke="#c8102e" stroke-width="5.6" fill="none" stroke-linecap="round"/><path d="M234.6 7.4C239 5.2 244 5.2 247.4 7" stroke="#fff8ef" stroke-width="3.2" fill="none" stroke-linecap="round"/><circle cx="259" cy="8.6" r="2.6" fill="#fff8ef"/></g>
+<path d="M212 40C208 28 218 26 226 32C236 40 268 40 280 38C288 36 290 26 296 22C302 20 304 26 300 30C294 40 290 60 270 62H222C214 62 212 54 212 40Z" fill="url(#sleighBody)"/>
+<path d="M216 44C230 50 262 50 282 44" stroke="#f2c14e" stroke-width="1.6" fill="none"/><path d="M226 32C236 40 268 40 280 38C288 36 290 26 296 22" stroke="#f2c14e" stroke-width="1.8" fill="none" stroke-linecap="round"/><circle cx="249" cy="53" r="3.4" fill="none" stroke="#f2c14e" stroke-width="1.2"/><path d="M243 53H239M255 53H259" stroke="#f2c14e" stroke-width="1.2" stroke-linecap="round"/>
+</svg>`;
+})();
 const shoot = `<div class="ly sky2" style="top:0;bottom:auto;height:60%"><i class="shoot" style="--sx:70vw;--sy:8vh"></i><i class="shoot" style="--sx:95vw;--sy:16vh"></i>${sleigh}</div>`;
 root.innerHTML = sky + shoot + far + `<div class="ly fog"><i></i></div>` + mid + near + side('l', [[40, 560], [190, 360], [-60, 640]]) + side('r', [[360, 600], [220, 380], [470, 660]]);
 // a little glowing village on the middle hill, with a theater marquee
@@ -861,19 +888,101 @@ const tb = base(cx), tw = 180; v += `<rect x="${cx - tw / 2}" y="${tb - 96}" wid
 for (let i = 0; i < 14; i++) { const t = i / 13; v += `<circle class="bulb" style="animation-delay:${(i % 4 * .45).toFixed(2)}s" cx="${cx - 78 + t * 156}" cy="${tb - 88}" r="2.6" fill="#ffe7a3"/><circle class="bulb" style="animation-delay:${((i + 2) % 4 * .45).toFixed(2)}s" cx="${cx - 78 + t * 156}" cy="${tb - 42}" r="2.6" fill="#ffe7a3"/>`; }
 const msvg = root.querySelector('.mid svg'); msvg.querySelector('defs').insertAdjacentHTML('beforeend', '<radialGradient id="villGlow"><stop offset="0" stop-color="#ffcf6b" stop-opacity=".22"/><stop offset="1" stop-color="#ffcf6b" stop-opacity="0"/></radialGradient>'); msvg.insertAdjacentHTML('beforeend', v); })();
 // dancers twirling along the near ridge, and walnuts rolling down it
-const nsvg = root.querySelector('.near svg'), np = ridges.near;
-const BALLERINA = '<circle cx="0" cy="-64" r="6.5"/><path d="M-4 -56h8l-2 20h-4z"/><ellipse cx="0" cy="-36" rx="17" ry="4.5"/><path d="M-1 -36L-3 0M1 -36L19 -30" stroke-width="3.2" fill="none"/><path d="M-3 -54Q-16 -68 -3 -76M3 -54Q16 -68 3 -76" stroke-width="2.6" fill="none"/>';
-const NUTCRACKER = '<rect x="-6" y="-80" width="12" height="15" rx="2"/><circle cx="0" cy="-82" r="3"/><rect x="-6" y="-65" width="12" height="11"/><rect x="-9" y="-54" width="18" height="26" rx="3"/><rect x="-8" y="-28" width="6.5" height="28"/><rect x="1.5" y="-28" width="6.5" height="28"/><path d="M-9 -50L-16 -34M9 -50L16 -34" stroke-width="4.5"/>';
-const crew = [[BALLERINA, '#fff3df'], [NUTCRACKER, '#f2c14e'], [BALLERINA, '#ffd6e2']].map(([d, c], i) => { nsvg.insertAdjacentHTML('beforeend', `<g class="dancer" fill="${c}" stroke="${c}" stroke-linecap="round" opacity=".92">${d}</g>`); return nsvg.lastElementChild; });
-const nuts = [0, 1, 2].map(() => { nsvg.insertAdjacentHTML('beforeend', '<g class="wnut"><ellipse cx="0" cy="0" rx="14" ry="12" fill="#9a6232"/><path d="M0 -12v24M-8 -6q4 6 0 12M8 -6q-4 6 0 12" stroke="#6b3f1c" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="-5" cy="-5" rx="4" ry="2.4" fill="#c58a52" opacity=".8"/></g>'); return nsvg.lastElementChild; });
-const placeCrew = raw => {
-crew.forEach((g, i) => { const x = 330 + raw * 900 + i * 95, y = yAt(np, x) + 6, a = raw * 26 + i * 1.3, sx = Math.sign(Math.cos(a)) * Math.max(.22, Math.abs(Math.cos(a))); g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) scale(${sx.toFixed(3)} 1)`); });
-nuts.forEach((g, i) => { const dist = raw * 1500 + i * 260, x = 1520 - dist, r = 13, y = yAt(np, x) - r - Math.abs(Math.sin(dist / 40)) * 8; g.setAttribute('transform', `translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(-dist / r * 57.3).toFixed(1)})`); g.style.opacity = x > -40 && x < 1640 ? 1 : 0; });
+// dancers and walnuts each live in their own small layer riding on the near hill, so posing them never repaints the hillside
+const nearEl = root.querySelector('.near'), nsvg = nearEl.querySelector('svg'), np = ridges.near;
+const box = (vb, inner) => { nearEl.insertAdjacentHTML('beforeend', `<svg class="dbox" viewBox="${vb.join(' ')}">${inner}</svg>`); return { el: nearEl.lastElementChild, vb }; };
+// articulated dancers: limbs are nested groups rotated at the joints, posed from keyframes
+const RIG = (() => {
+const ln = (y2, w, c, y1 = 0) => `<line x1="0" y1="${y1}" x2="0" y2="${y2}" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>`;
+const scallop = (rx, ry, cy, n, bump) => { let d = ''; for (let i = 0; i <= n; i++) { const a = Math.PI * 2 * i / n, x = Math.cos(a) * rx, y = cy + Math.sin(a) * ry; d += (i ? `Q${(Math.cos(a - Math.PI / n) * (rx + bump)).toFixed(1)} ${(cy + Math.sin(a - Math.PI / n) * (ry + bump * .45)).toFixed(1)} ` : 'M') + `${x.toFixed(1)} ${y.toFixed(1)}`; } return d + 'Z'; };
+const kinds = {
+ballerina: c => ({ L1: 27, L2: 33, hip: 0, shoulder: -33,
+leg: i => `<g data-j="t${i}">${ln(27, 7, c.tights)}<g data-j="k${i}" transform="translate(0 27)">${ln(24, 5.4, c.tights)}${ln(32, 4.6, c.shoe, 23)}<path d="M-2.6 17L2.6 22M2.6 17L-2.6 22" stroke="${c.ribbon}" stroke-width="1" fill="none"/></g></g>`,
+arm: i => `<g data-j="a${i}" transform="translate(0 -32)">${ln(16, 3.8, c.skin)}<g data-j="e${i}" transform="translate(0 16)">${ln(14, 3.3, c.skin)}<ellipse cx="0" cy="15.5" rx="2" ry="2.8" fill="${c.skin}"/></g></g>`,
+body: `<path d="M-5.5 0C-6.5 -10 -8.4 -21 -7.6 -29Q-7 -34.5 0 -34.5Q7 -34.5 7.6 -29C8.4 -21 6.5 -10 5.5 0Z" fill="${c.bodice}"/><path d="M-7.4 -29.5Q0 -24 7.4 -29.5" stroke="${c.trim}" stroke-width="1.4" fill="none"/><path d="M0 -26V-3" stroke="${c.trim}" stroke-width=".9" stroke-dasharray="1.2 2.6" stroke-linecap="round"/>`,
+skirt: `<path d="${scallop(29, 4.6, 1, 18, 3.6)}" fill="${c.tutu2}" opacity=".9"/><path d="${scallop(25, 3.4, -.6, 16, 3)}" fill="${c.tutu}"/><path d="M-20 -1.4Q0 3.6 20 -1.4" stroke="#fff" stroke-opacity=".6" stroke-width="1" fill="none"/>`,
+head: `<g data-j="h" transform="translate(0 -36)">${ln(-6, 4.2, c.skin)}<g transform="translate(0 -11)"><ellipse cx=".6" cy="0" rx="6.8" ry="7.6" fill="${c.skin}"/><path d="M-7 1.5Q-8.4 -8.6 0 -8.2Q6.4 -8 7 -3.6Q2 -6 -2 -3Q-3 2 -7 1.5Z" fill="${c.hair}"/><circle cx="-6.4" cy="-5.6" r="4.4" fill="${c.hair}"/><path d="M-3.5 -8.4Q1.5 -11.6 6.4 -6.8" stroke="${c.trim}" stroke-width="1.6" fill="none" stroke-linecap="round"/><circle cx="1.6" cy="-10" r="1.3" fill="#fff6d8"/><path d="M3.2 -.6Q4.8 .4 6.2 -.4" stroke="${c.hair}" stroke-width=".9" fill="none" stroke-linecap="round"/><circle cx="4.4" cy="2.8" r="1.7" fill="#f08a8a" opacity=".45"/><path d="M4.8 4.8Q5.6 5.4 6.4 4.9" stroke="#b5485a" stroke-width=".9" fill="none" stroke-linecap="round"/></g></g>` }),
+nutcracker: c => ({ L1: 25, L2: 31, hip: 0, shoulder: -34,
+leg: i => `<g data-j="t${i}">${ln(25, 8.6, c.pants)}<g data-j="k${i}" transform="translate(0 25)">${ln(19, 7.6, c.boot, 2)}<path d="M-4.6 -1H4.6V3H-4.6Z" fill="${c.boot}"/><path d="M-4.4 27Q-4.8 21 -3.4 18H4.2Q5 22 9.6 24.6Q11 27 8 27.6H-4Z" fill="${c.boot}"/><path d="M-3 4H3" stroke="${c.gold}" stroke-width="1.2"/></g></g>`,
+arm: i => `<g data-j="a${i}" transform="translate(0 -31)">${ln(15, 6, c.coat)}<g data-j="e${i}" transform="translate(0 15)">${ln(12, 5.4, c.coat)}${ln(13, 5.8, c.gold, 11.4)}<circle cx="0" cy="16.4" r="3.4" fill="${c.glove}"/></g></g>`,
+body: `<path d="M-9 -1Q-10.5 -18 -9.6 -33Q0 -37 9.6 -33Q10.5 -18 9 -1Z" fill="${c.coat}"/><path d="M-9.4 -1L-11 8L-3 6ZM9.4 -1L11 8L3 6Z" fill="${c.coatDark}"/><path d="M-8.5 -32L8 -3M8.5 -32L-8 -3" stroke="${c.belt}" stroke-width="2.4"/><rect x="-9.6" y="-6" width="19.2" height="4.6" fill="${c.gold}"/><rect x="-2.2" y="-6.6" width="4.4" height="5.8" rx="1" fill="${c.coatDark}" stroke="${c.gold}" stroke-width="1"/><g fill="${c.gold}"><circle cx="0" cy="-27" r="1.3"/><circle cx="0" cy="-21" r="1.3"/><circle cx="0" cy="-15" r="1.3"/><circle cx="0" cy="-9.6" r="1.3"/></g><path d="M-12.6 -33.6Q-10 -37.6 -6 -35.4L-6.6 -31.6Q-10 -32 -12.6 -30Z" fill="${c.gold}"/><path d="M12.6 -33.6Q10 -37.6 6 -35.4L6.6 -31.6Q10 -32 12.6 -30Z" fill="${c.gold}"/>`,
+skirt: '',
+head: `<g data-j="h" transform="translate(0 -36)"><rect x="-4.4" y="-5" width="8.8" height="5.6" fill="${c.coat}"/><rect x="-4.6" y="-4.4" width="9.2" height="1.8" fill="${c.gold}"/><g transform="translate(0 -14)"><rect x="-7.6" y="-8" width="15.2" height="14.6" rx="3.2" fill="${c.skin}"/><path d="M-7.8 1.6Q-8.6 10.4 0 11.6Q8.6 10.4 7.8 1.6Q4 4.6 0 3.4Q-4 4.6 -7.8 1.6Z" fill="#f4f1ea"/><path d="M-1 1.2Q4.6 -1.6 9.6 1.6Q6 2.8 2 2.6Z" fill="#f4f1ea"/><rect x="-3.2" y="3.4" width="10" height="2.6" rx="1" fill="#2a120c"/><path d="M-3 3.4H7" stroke="#fff" stroke-width=".9"/><circle cx="3.8" cy="-2.6" r="1.5" fill="#1b0d08"/><circle cx="4.2" cy="-3" r=".5" fill="#fff"/><path d="M1.6 -5.6L6.4 -5.2" stroke="#1b0d08" stroke-width="1.1" stroke-linecap="round"/><circle cx="6" cy="1" r="1.8" fill="#e8636b" opacity=".55"/><path d="M-9 -8H9L8 -23.6Q0 -26.4 -8 -23.6Z" fill="${c.hat}"/><path d="M-9.2 -8.4H9.2V-11.6H-9.2Z" fill="${c.gold}"/><path d="M-1 -21.6L4.6 -15.4L-1 -9.4L-6.6 -15.4Z" fill="${c.gold}"/><circle cx="-1" cy="-15.4" r="1.7" fill="${c.coat}"/><path d="M-2 -24.6Q-6 -35.6 2 -36.6Q-1 -31 1.6 -24.6Z" fill="${c.plume}"/><path d="M-9 -8.4Q-11 0 -9.4 8" stroke="${c.gold}" stroke-width="1" fill="none"/></g></g>` })
 };
-placeCrew(0);
+// pose keys: tb torso lean, t/k thigh+knee (0 front, 1 back), a/e shoulder+elbow, hd head, lift jump height, sp cumulative turns
+const KEYS = ['tb', 't0', 'k0', 't1', 'k1', 'a0', 'e0', 'a1', 'e1', 'hd', 'lift', 'sp'];
+const P = o => KEYS.map(k => o[k] || 0);
+const dances = {
+ballerina: [
+P({ t0: -6, t1: 6, a0: -14, e0: -34, a1: 10, e1: 30 }), // fifth, arms low and rounded
+P({ t0: -2, t1: 2, a0: -176, e0: -46, a1: 176, e1: 46, hd: -8 }), // releve, arms in fifth overhead
+P({ t1: -62, k1: 128, a0: -78, e0: -56, a1: 78, e1: 56, sp: 1 }), // passe pirouette
+P({ tb: 26, t1: 96, a0: -112, e0: -8, a1: 82, e1: 8, hd: -14, sp: 1 }), // arabesque
+P({ tb: 6, t0: -26, k0: 44, t1: 22, k1: 30, a0: -40, e0: -30, a1: 40, e1: 30, sp: 1 }), // plie, ready to leap
+P({ tb: 8, t0: -88, t1: 84, a0: -122, e0: -6, a1: 104, e1: 6, hd: -12, lift: 40, sp: 1 }), // grand jete
+P({ tb: 12, t1: 74, k1: -62, a0: -150, e0: -30, a1: 96, e1: 20, hd: -6, sp: 1 }), // attitude
+P({ t1: -62, k1: 128, a0: -168, e0: -26, a1: 168, e1: 26, sp: 2 }) // pirouette, arms up
+],
+nutcracker: [
+P({ t0: -4, t1: 4, a0: 4, e0: 0, a1: -4, e1: 0 }), // at attention
+P({ t0: -58, k0: 64, t1: 10, a0: 34, e0: -10, a1: -30, e1: -10 }), // march
+P({ t0: 4, t1: -58, k1: 64, a0: -36, e0: -10, a1: 30, e1: -10 }), // march
+P({ t0: -4, t1: 4, a0: -150, e0: -24, a1: -4, e1: 0, hd: -4 }), // salute
+P({ tb: -4, t0: -96, k0: 0, t1: 6, a0: 30, e0: -30, a1: -30, e1: 30, hd: 4 }), // toy soldier high kick
+P({ tb: 6, t0: -26, k0: 40, t1: 20, k1: 32, a0: -20, e0: -60, a1: 20, e1: -60 }), // crouch
+P({ t0: -76, t1: 76, a0: -140, e0: -10, a1: 140, e1: 10, lift: 44, sp: 1 }), // split jump with a spin
+P({ tb: 22, t0: -10, t1: 14, a0: 60, e0: -70, a1: -20, e1: 0, hd: 14, sp: 1 }) // bow
+]
+};
+const smooth = t => t * t * (3 - 2 * t), R = Math.PI / 180;
+const build = (kind, c) => {
+const k = kinds[kind](c);
+const svg = `<ellipse class="pool" cx="0" cy="1" rx="44" ry="7" fill="url(#poolGlow)"/><g class="flip"><g class="hipg">${k.leg(1)}${k.leg(0)}<g data-j="tb">${k.arm(1)}${k.body}${k.skirt}${k.head}${k.arm(0)}</g></g></g>`;
+return { svg, k, seq: dances[kind] };
+};
+const attach = (g, b) => {
+const j = {}; g.querySelectorAll('[data-j]').forEach(n => j[n.dataset.j] = n);
+const flip = g.querySelector('.flip'), hip = g.querySelector('.hipg'), { L1, L2 } = b.k, seq = b.seq, N = seq.length, spins = seq[N - 1][11];
+const base = { a0: -32, a1: -32, h: -36 };
+const pose = s => { const n = Math.floor(s), f = smooth(s - n), i = ((n % N) + N) % N, A = seq[i], B = seq[(i + 1) % N], cyc = Math.floor(n / N) + (i + 1 === N ? 1 : 0);
+return KEYS.map((key, m) => { let a = A[m], bb = B[m]; if (key === 'sp') { a += Math.floor(n / N) * spins; bb += cyc * spins; } return a + (bb - a) * f; }); };
+const footY = (t, kn) => Math.cos(t * R) * L1 + Math.cos((t + kn) * R) * L2;
+// only touch the DOM when a joint actually moved (to the nearest degree), which keeps style work low while scrolling
+const set = (el, v) => { if (el._t !== v) { el._t = v; el.setAttribute('transform', v); } }, d = v => Math.round(v);
+const eo = [j.e0, j.e1].map(n => n.getAttribute('transform').match(/translate\(0 ([\d.]+)/)[1]);
+let last = NaN;
+return s => { if (Math.abs(s - last) < .002) return; last = s; const [tb, t0, k0, t1, k1, a0, e0, a1, e1, hd, lift, sp] = pose(s);
+const hy = -Math.max(footY(t0, k0), footY(t1, k1)) - lift, turn = Math.cos(sp * Math.PI * 2), sx = Math.sign(turn || 1) * Math.max(.16, Math.abs(turn));
+set(flip, `scale(${sx.toFixed(2)} 1)`); set(hip, `translate(0 ${hy.toFixed(1)})`); set(j.tb, `rotate(${d(tb)})`);
+set(j.t0, `rotate(${d(t0)})`); set(j.k0, `translate(0 ${L1}) rotate(${d(k0)})`); set(j.t1, `rotate(${d(t1)})`); set(j.k1, `translate(0 ${L1}) rotate(${d(k1)})`);
+set(j.a0, `translate(0 ${base.a0}) rotate(${d(a0)})`); set(j.e0, `translate(0 ${eo[0]}) rotate(${d(e0)})`);
+set(j.a1, `translate(0 ${base.a1}) rotate(${d(a1)})`); set(j.e1, `translate(0 ${eo[1]}) rotate(${d(e1)})`); set(j.h, `translate(0 ${base.h}) rotate(${d(hd)})`); };
+};
+return { build, attach };
+})();
+nsvg.querySelector('defs').insertAdjacentHTML('beforeend', '<radialGradient id="poolGlow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>');
+const crew = [['ballerina', { skin: '#f2c7a5', hair: '#3a2116', bodice: '#e3192f', tutu: '#fff4f2', tutu2: '#ffc9d6', tights: '#f7d6cf', shoe: '#f4b3aa', ribbon: '#e48f86', trim: '#f2c14e' }],
+['nutcracker', { skin: '#f6dcc0', coat: '#c8102e', coatDark: '#8a0a1f', pants: '#f4efe6', boot: '#16100c', gold: '#f2c14e', belt: '#f4efe6', glove: '#fbf7ef', hat: '#15110f', plume: '#e3192f' }],
+['ballerina', { skin: '#c68b62', hair: '#1c120c', bodice: '#8e3fa8', tutu: '#f8ecff', tutu2: '#d9b8ef', tights: '#f0d2d6', shoe: '#e8b4c4', ribbon: '#c98aa6', trim: '#f2c14e' }]].map(([kind, c]) => { const b = RIG.build(kind, c); const bx = box([-95, -185, 190, 200], `<g class="dancer">${b.svg}</g>`); return { ...bx, pose: RIG.attach(bx.el.firstElementChild, b) }; });
+const nuts = [0, 1, 2].map(() => box([-16, -16, 32, 32], '<g class="wnut"><ellipse cx="0" cy="0" rx="14" ry="12" fill="#9a6232"/><path d="M0 -12v24M-8 -6q4 6 0 12M8 -6q-4 6 0 12" stroke="#6b3f1c" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="-5" cy="-5" rx="4" ry="2.4" fill="#c58a52" opacity=".8"/></g>'));
+// map hill coordinates to pixels the way the hill's svg does (xMidYMax slice); refreshed on resize only
+let mk = 1, mox = 0, moy = 0, cachedW = 0;
+const nearMap = () => { const w = cachedW = nearEl.offsetWidth, h = nearEl.offsetHeight; mk = Math.max(w / W, h / 360); mox = (w - W * mk) / 2; moy = h - 360 * mk;
+[...crew, ...nuts].forEach(b => { b.el.style.width = (b.vb[2] * mk).toFixed(1) + 'px'; b.el.style.height = (b.vb[3] * mk).toFixed(1) + 'px'; b._t = ''; }); };
+const put = (b, x, y, extra = '') => { const t = `translate3d(${(mox + (x + b.vb[0]) * mk).toFixed(1)}px,${(moy + (y + b.vb[1]) * mk).toFixed(1)}px,0)${extra}`; if (b._t !== t) { b._t = t; b.el.style.transform = t; } };
+nearMap(); addEventListener('resize', () => { nearMap(); placeCrew(lastRaw, lastS); });
+let lastRaw = 0, lastS = 0;
+const placeCrew = (raw, s) => { lastRaw = raw; lastS = s;
+// each dancer steps through its routine as you scroll; s is the smoothed routine position
+// once the hill sweeps up past the camera the dancers are huge and blurred by speed, so they hold their pose (saves a lot of drawing on phones)
+const live = raw < .55;
+crew.forEach((b, i) => { const x = 300 + raw * 900 + i * 125; put(b, x, yAt(np, x) + 4); const sx = mox + x * mk; if (live && sx > -120 && sx < cachedW + 120) b.pose(s + i * 2.6); });
+nuts.forEach((b, i) => { const dist = raw * 1500 + i * 260, x = 1520 - dist, r = 13, y = yAt(np, x) - r - Math.abs(Math.sin(dist / 40)) * 8; put(b, x, y, ` rotate(${(-dist / r * 57.3).toFixed(0)}deg)`); b.el.style.opacity = x > -40 && x < 1640 ? 1 : 0; });
+};
+placeCrew(0, 0);
 const L = { sleigh: root.querySelector('.sleigh'), sky: root.querySelector('.sky'), far: root.querySelector('.far'), mid: root.querySelector('.mid'), near: root.querySelector('.near'), l: root.querySelector('.side.l'), r: root.querySelector('.side.r'), fog: root.querySelector('.fog') };
 if (reduce) return;
-let q = false, px = 0, tx = 0, py = 0, ty = 0, stopTop = stop.offsetTop;
+let q = false, px = 0, tx = 0, py = 0, ty = 0, ds = 0, stopTop = stop.offsetTop;
 const measure = () => { stopTop = stop.getBoundingClientRect().top + scrollY; kick(); };
 if (window.ResizeObserver) new ResizeObserver(measure).observe(document.body); addEventListener('load', measure);
 const ease = t => 1 - Math.pow(1 - t, 2), clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
@@ -883,7 +992,7 @@ const vh = stableH, vw = stableW, end = Math.max(1, stopTop - vh * .35), raw = c
 const top = stopTop - scrollY, fade = clamp((top - vh * .5) / (vh * .5)), late = 1 - Math.max(0, (p - .55) / .45) * .85;
 root.style.opacity = fade; root.style.visibility = fade < .01 ? 'hidden' : 'visible'; if (fade < .01) return;
 px += (tx - px) * .06; py += (ty - py) * .06; if (Math.abs(tx - px) > .002 || Math.abs(ty - py) > .002) kick();
-placeCrew(raw);
+const dt = raw * 20; ds += (dt - ds) * .14; if (Math.abs(dt - ds) > .003) kick(); placeCrew(raw, ds);
 const rise = clamp(raw / .35), sweep = clamp((raw - .3) / .7), sw = ease(sweep);
 L.sky.style.transform = `translate3d(${px * -6}px,${p * vh * .1 + py * -4}px,0)`;
 L.far.style.transform = `translate3d(${px * -10 - p * vw * .04}px,${p * vh * .02 + py * -6}px,0) scale(${1 + p * .1})`;
@@ -895,7 +1004,7 @@ L.l.style.transform = `translate3d(${px * -50 - sw * vw * .5}px,${sideY}px,0) sc
 L.r.style.transform = `translate3d(${px * -50 + sw * vw * .5}px,${sideY}px,0) scale(${sideS}) rotate(${sw * 6}deg)`; L.l.style.opacity = L.r.style.opacity = late;
 // a little sleigh rides across the moon as you scroll
 const k = clamp((raw - .05) / .6), sy = (vh * .6) * (.34 - Math.sin(k * Math.PI) * .2);
-L.sleigh.style.transform = `translate3d(${vw * (1.1 - k * 1.35)}px,${sy}px,0) rotate(${-8 + k * 10}deg)`; L.sleigh.style.opacity = k > 0 && k < 1 ? .9 : 0;
+L.sleigh.style.transform = `translate3d(${vw * (1.1 - k * 1.65)}px,${sy}px,0) rotate(${-8 + k * 10}deg)`; const fly = k > 0 && k < 1; L.sleigh.style.opacity = fly ? 1 : 0; if (fly !== L.sleigh.classList.contains('fly')) L.sleigh.classList.toggle('fly', fly);
 };
 const kick = () => { if (!q) { q = true; requestAnimationFrame(update); } };
 addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1; kick(); } }, { passive: true });
@@ -1184,11 +1293,13 @@ setTimeout(() => talk('Psst! Over here.', 2600), 1400);
 window.buddyTalk = talk;
 })();
 (function eyesFollow() {
-const faces = $$('.eyes').map(g => ({ g, svg: g.ownerSVGElement, irises: [...g.querySelectorAll('.iris')] }));
+const faces = $$('.eyes').map(g => ({ g, svg: g.ownerSVGElement, irises: [...g.querySelectorAll('.iris')], seen: true }));
+// only faces on screen get measured, so scrolling past them doesn't force a layout every frame
+if (window.IntersectionObserver) { const io = new IntersectionObserver(es => es.forEach(e => { const f = faces.find(f => f.g === e.target); if (f) f.seen = e.isIntersecting; }), { rootMargin: '50px' }); faces.forEach(f => io.observe(f.g)); }
 let tx = innerWidth / 2, ty = innerHeight / 2, lastMove = 0, queued = false;
 const aim = () => { queued = false;
 for (const f of faces) {
-if (f.g.dataset.lock === '1') continue;
+if (f.g.dataset.lock === '1' || !f.seen) continue;
 const r = f.g.getBoundingClientRect(); if (r.bottom < -50 || r.top > innerHeight + 50) continue;
 const cx = r.left + r.width / 2, cy = r.top + r.height / 2;
 const dx = tx - cx, dy = ty - cy, d = Math.hypot(dx, dy) || 1, k = Math.min(1, d / 120);
@@ -1199,7 +1310,7 @@ const look = (x, y) => { tx = x; ty = y; if (!queued) { queued = true; requestAn
 addEventListener('pointermove', e => { lastMove = Date.now(); look(e.clientX, e.clientY); }, { passive: true });
 addEventListener('pointerdown', e => { lastMove = Date.now(); look(e.clientX, e.clientY); }, { passive: true });
 addEventListener('touchmove', e => { const t = e.touches[0]; if (t) { lastMove = Date.now(); look(t.clientX, t.clientY); } }, { passive: true });
-addEventListener('scroll', () => { if (Date.now() - lastMove > 1500) requestAnimationFrame(aim); }, { passive: true });
+addEventListener('scroll', () => { if (Date.now() - lastMove > 1500 && !queued) { queued = true; requestAnimationFrame(aim); } }, { passive: true });
 // idle glances when nobody is touching (phones)
 setInterval(() => { if (Date.now() - lastMove > 2500) look(Math.random() * innerWidth, Math.random() * innerHeight); }, 2200);
 // blink
@@ -1438,6 +1549,55 @@ if (!reduce && 'IntersectionObserver' in window) {
 const rv = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.remove('below'); rv.unobserve(e.target); } }), { rootMargin: '0px 0px -8% 0px' });
 $$('[data-reveal]').forEach(el => { if (el.getBoundingClientRect().top > innerHeight) { el.classList.add('below'); rv.observe(el); } });
 }
+
+// a little snowy village at the bottom that rises into view as you reach the end
+(() => {
+const town = $('#town'); if (!town) return;
+let seed = 21; const rnd = (a = 0, b = 1) => { seed = (seed * 16807) % 2147483647; return a + (b - a) * (seed / 2147483647); };
+const W = 1600, H = 440;
+const pine = (x, base, h, fill, snow) => { const w = h * .46; let d = '', sn = '';
+[[0, 1], [.28, .78], [.52, .56]].forEach(([o, k]) => { const top = base - h * (o + .48), bot = base - h * o * .92, ww = w * k; d += `M${x} ${top}L${x + ww} ${bot}L${x - ww} ${bot}Z`; sn += `M${x} ${top}L${x + ww * .42} ${top + (bot - top) * .42}Q${x} ${top + (bot - top) * .5} ${x - ww * .42} ${top + (bot - top) * .42}Z`; });
+return `<path d="${d}" fill="${fill}"/><rect x="${x - h * .035}" y="${base - h * .04}" width="${h * .07}" height="${h * .09}" fill="${fill}"/><path d="${sn}" fill="${snow}"/>`; };
+const hill = (y, amp, n, ph) => { const pts = []; for (let i = 0; i <= n; i++) pts.push([i / n * W, y + Math.sin(i * 1.3 + ph) * amp]); let d = `M0 ${H + 40}L0 ${pts[0][1]}`; for (let i = 1; i < pts.length; i++) { const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (x0 + x1) / 2; d += `C${m} ${y0} ${m} ${y1} ${x1} ${y1}`; } return { d: d + `L${W} ${H + 40}Z`, at: x => { const i = Math.min(n - 1, Math.floor(x / W * n)), [x0, y0] = pts[i], [x1, y1] = pts[i + 1], t = (x - x0) / (x1 - x0), e = t * t * (3 - 2 * t); return y0 + (y1 - y0) * e; } }; };
+const svg = (body, defs = '', par = 'xMidYMax slice') => `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="${par}"><defs>${defs}</defs>${body}</svg>`;
+// back hills with small pines
+const h1 = hill(250, 18, 6, 1); let b1 = ''; for (let i = 0; i < 46; i++) { const x = rnd(0, W), hh = rnd(22, 46); b1 += pine(x, h1.at(x) + 3, hh, '#164433', 'rgba(230,242,244,.45)'); }
+b1 += `<path d="${h1.d}" fill="url(#tg1)"/>`;
+// the village: cottages with warm windows, a chapel and a little theater, strung with lights
+const h2 = hill(330, 8, 4, 2.4); let b2 = `<ellipse cx="800" cy="300" rx="420" ry="120" fill="url(#tglow)"/>`;
+const cot = (x, w, h, roof, wall) => { const b = h2.at(x) + 6; let o = `<rect x="${x - w / 2}" y="${b - h}" width="${w}" height="${h}" fill="${wall}"/><path d="M${x - w / 2 - 7} ${b - h}L${x} ${b - h - roof}L${x + w / 2 + 7} ${b - h}Z" fill="#3a1c14"/><path d="M${x - w / 2 - 7} ${b - h}L${x} ${b - h - roof}L${x + w / 2 + 7} ${b - h}L${x + w / 2} ${b - h + 5}L${x} ${b - h - roof + 8}L${x - w / 2} ${b - h + 5}Z" fill="#eef6f7"/>`;
+const nw = Math.max(1, Math.round(w / 26)); for (let i = 0; i < nw; i++) { const wx = x - w / 2 + (i + .5) * w / nw - 6; o += `<rect class="win" style="animation-delay:${rnd(0, 5).toFixed(1)}s" x="${wx}" y="${b - h + 12}" width="12" height="14" rx="2" fill="#ffd27a"/><path d="M${wx + 6} ${b - h + 12}v14M${wx} ${b - h + 19}h12" stroke="${wall}" stroke-width="1.4"/>`; }
+o += `<rect x="${x - 6}" y="${b - 20}" width="12" height="20" rx="5" fill="#5a2a18"/><circle cx="${x}" cy="${b - h - roof * .45}" r="5" fill="#2a6b3a" stroke="#e3192f" stroke-width="2"/>`;
+const chx = x + w * .24; o += `<rect x="${chx}" y="${b - h - roof * .78}" width="9" height="${roof * .58}" fill="#3a1c14"/><path d="M${chx - 1} ${b - h - roof * .78}h11v-3h-11z" fill="#eef6f7"/>`; return o; };
+[[560, 62, 46, 30, '#5e2a22'], [640, 50, 40, 26, '#2f4a6b'], [960, 58, 44, 30, '#2f5b45'], [1040, 66, 50, 32, '#6b3b23'], [470, 52, 38, 26, '#2f5b45'], [1130, 50, 40, 26, '#5e2a22'], [360, 60, 42, 28, '#6b3b23'], [1240, 58, 44, 30, '#2f4a6b']].forEach(a => b2 += cot(...a));
+// chapel with a steeple, then the theater in the middle
+const cb = h2.at(720) + 6; b2 += `<rect x="700" y="${cb - 70}" width="40" height="70" fill="#4a2a20"/><path d="M696 ${cb - 70}L720 ${cb - 128}L744 ${cb - 70}Z" fill="#3a1c14"/><path d="M696 ${cb - 70}L720 ${cb - 128}L744 ${cb - 70}L740 ${cb - 66}L720 ${cb - 118}L700 ${cb - 66}Z" fill="#eef6f7"/><circle cx="720" cy="${cb - 84}" r="7" fill="#ffd27a" class="win"/><path d="M720 ${cb - 128}v-14M714 ${cb - 136}h12" stroke="#f2c14e" stroke-width="2.4"/><rect x="712" y="${cb - 30}" width="16" height="30" rx="8" fill="#ffd27a"/>`;
+const tx = 860, tb = h2.at(tx) + 6, tw = 150; b2 += `<rect x="${tx - tw / 2}" y="${tb - 84}" width="${tw}" height="84" fill="#6e1222"/><path d="M${tx - tw / 2 - 8} ${tb - 84}L${tx} ${tb - 118}L${tx + tw / 2 + 8} ${tb - 84}Z" fill="#3a1c14"/><path d="M${tx - tw / 2 - 8} ${tb - 84}L${tx} ${tb - 118}L${tx + tw / 2 + 8} ${tb - 84}L${tx + tw / 2} ${tb - 79}L${tx} ${tb - 110}L${tx - tw / 2} ${tb - 79}Z" fill="#eef6f7"/>
+<rect x="${tx - 66}" y="${tb - 74}" width="132" height="32" rx="5" fill="#a3122a" stroke="#f2c14e" stroke-width="3"/><text x="${tx}" y="${tb - 52}" text-anchor="middle" font-family="Bagel Fat One, Arial Rounded MT Bold, sans-serif" font-size="17" fill="#fff3df" letter-spacing="1">DEC 20 · 5 PM</text>
+<rect x="${tx - 16}" y="${tb - 32}" width="32" height="32" rx="14" fill="#ffd27a"/><rect x="${tx - 56}" y="${tb - 30}" width="14" height="18" rx="2" fill="#ffd27a" class="win"/><rect x="${tx + 42}" y="${tb - 30}" width="14" height="18" rx="2" fill="#ffd27a" class="win"/>`;
+for (let i = 0; i < 12; i++) { const t = i / 11; b2 += `<circle class="bulb" style="animation-delay:${(i % 4 * .45).toFixed(2)}s" cx="${tx - 62 + t * 124}" cy="${tb - 78}" r="2.4" fill="#ffe7a3"/>`; }
+// string lights swooping across the rooftops
+const sag = (x0, x1, y, d) => { let o = `<path d="M${x0} ${y}Q${(x0 + x1) / 2} ${y + d * 2} ${x1} ${y}" stroke="#1b120c" stroke-width="1.2" fill="none"/>`; for (let i = 1; i < 9; i++) { const t = i / 9, xx = x0 + (x1 - x0) * t, yy = y + 4 * d * t * (1 - t); o += `<circle class="bulb" style="animation-delay:${rnd(0, 1.8).toFixed(2)}s" cx="${xx}" cy="${yy + 2}" r="2.6" fill="${['#e3192f', '#f2c14e', '#3fb6ff', '#ff7ac8', '#62e08a'][i % 5]}"/>`; } return o; };
+b2 += sag(560, 640, h2.at(600) - 46, 9) + sag(960, 1040, h2.at(1000) - 50, 10) + sag(360, 470, h2.at(415) - 44, 9) + sag(1130, 1240, h2.at(1185) - 44, 9);
+for (let i = 0; i < 9; i++) { const x = [300, 420, 520, 680, 780, 1000, 1090, 1190, 1300][i]; b2 += pine(x, h2.at(x) + 8, rnd(44, 70), '#0f3a29', 'rgba(232,244,246,.6)'); }
+b2 += `<path d="${h2.d}" fill="url(#tg2)"/><path d="${h2.d.replace(/L1600 \d+(\.\d+)?Z$/, '').replace(/^M0 \d+(\.\d+)?L/, 'M')}" fill="none" stroke="rgba(240,248,250,.6)" stroke-width="3"/>`;
+// snowy foreground drift that melts into the footer
+const h3 = hill(392, 10, 5, .6); const b3 = `<path d="${h3.d}" fill="url(#tg3)"/><path d="${h3.d.replace(/L1600 \d+(\.\d+)?Z$/, '').replace(/^M0 \d+(\.\d+)?L/, 'M')}" fill="none" stroke="rgba(240,248,250,.75)" stroke-width="3"/>`;
+const side = (cls, xs) => { let t = ''; xs.forEach(([x, h]) => t += pine(x, 700, h, '#062216', 'rgba(225,238,240,.6)')); return `<div class="tl ${cls}"><svg viewBox="0 0 400 700" preserveAspectRatio="x${cls === 'tl-l' ? 'Min' : 'Max'}YMax meet">${t}</svg></div>`; };
+const grad = (id, a, b) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
+town.innerHTML = `<div class="tl t1">${svg(b1, grad('tg1', '#2c5c52', '#0f3626'))}</div><div class="tl t2">${svg(b2, grad('tg2', '#3a6c64', '#0e3424') + '<radialGradient id="tglow"><stop offset="0" stop-color="#ffcf6b" stop-opacity=".2"/><stop offset="1" stop-color="#ffcf6b" stop-opacity="0"/></radialGradient>')}</div><div class="tl t3">${svg(b3, grad('tg3', '#2b564c', '#0b3320').replace('offset="1"', 'offset=".55"'))}</div>` + side('tl-l', [[30, 520], [170, 340]]) + side('tl-r', [[370, 540], [230, 350]]);
+if (reduce) return;
+const L = [['.t1', 50, 0], ['.t2', 110, 0], ['.t3', 170, 0], ['.tl-l', 140, -1], ['.tl-r', 140, 1]].map(([c, dy, dx]) => [town.querySelector(c), dy, dx]);
+let q = false, on = false, top = 0;
+const measure = () => { top = town.getBoundingClientRect().top + scrollY; };
+const update = () => { q = false; const vh = stableH, t = Math.min(1, Math.max(0, (scrollY + vh - top) / (town.offsetHeight * 1.15))), e = 1 - Math.pow(1 - t, 3);
+L.forEach(([el, dy, dx]) => el.style.transform = `translate3d(${(1 - e) * dx * 30}vw,${((1 - e) * dy).toFixed(1)}px,0)`); };
+const kick = () => { if (on && !q) { q = true; requestAnimationFrame(update); } };
+measure(); update();
+if (window.ResizeObserver) new ResizeObserver(() => { measure(); kick(); }).observe(document.body);
+new IntersectionObserver(([en]) => { on = en.isIntersecting; town.classList.toggle('live', on); if (on) { measure(); kick(); } }, { rootMargin: '20% 0px' }).observe(town);
+addEventListener('scroll', kick, { passive: true });
+})();
 </script>
 </body>
 </html>
