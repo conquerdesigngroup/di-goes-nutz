@@ -132,6 +132,7 @@ background:radial-gradient(120% 70% at 50% 0%,#1d6b3f 0%,rgba(20,90,52,.0) 60%),
 .hero-copy::before{content:"";position:absolute;inset:-40px -60px -30px;z-index:-1;pointer-events:none;background:radial-gradient(closest-side,rgba(4,26,16,.72),rgba(4,26,16,.45) 55%,rgba(4,26,16,0))}
 .presents{font-family:var(--mono);font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--muted)}
 .tagline{font-family:var(--display);font-size:clamp(26px,7.4vw,40px);line-height:1.08;max-width:16ch;text-wrap:balance}
+.credit{margin-top:8px;font-family:var(--mono);font-size:13px;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);text-shadow:0 1px 8px rgba(0,0,0,.8)}
 .tagline em{font-style:normal;color:var(--gold)}
 .when{display:inline-flex;flex-wrap:wrap;justify-content:center;gap:8px}
 .chip{font-family:var(--mono);font-size:13px;letter-spacing:.06em;padding:7px 12px;border-radius:999px;background:rgba(255,243,223,.1);border:1px solid rgba(255,243,223,.2)}
@@ -350,6 +351,15 @@ background:linear-gradient(180deg,rgba(11,51,32,0),rgba(11,51,32,.92) 30%);trans
 .dock-meta{flex:1;min-width:0;font-family:var(--mono);font-size:12px;line-height:1.3;color:var(--cream)}
 .dock-meta b{display:block;font-family:var(--display);font-weight:400;font-size:17px;letter-spacing:.02em}
 .dock .btn{font-size:19px;padding:14px 22px 12px;min-height:50px}
+.music{position:fixed;right:max(12px,env(safe-area-inset-right,0px));top:calc(10px + env(safe-area-inset-top,0px));z-index:31;width:42px;height:42px;border-radius:50%;display:grid;place-items:center;background:rgba(10,32,22,.82);border:1px solid rgba(242,193,78,.55);color:var(--gold);box-shadow:0 6px 18px rgba(0,0,0,.35);cursor:pointer;-webkit-tap-highlight-color:transparent}
+.music svg{width:22px;height:22px}
+.music .slash{opacity:1;transition:opacity .2s}
+.music[aria-pressed="true"] .slash{opacity:0}
+.music[aria-pressed="true"] svg{animation:bob 1.2s ease-in-out infinite}
+.music-tip{position:absolute;right:0;top:50px;white-space:nowrap;font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--cream);background:rgba(10,32,22,.82);padding:6px 10px;border-radius:999px;opacity:0;transform:translateX(6px);transition:opacity .3s,transform .3s;pointer-events:none}
+.music.hint .music-tip{opacity:1;transform:none}
+.topbar .sound{margin-right:50px}
+@media (prefers-reduced-motion:reduce){.music[aria-pressed="true"] svg{animation:none}}
 .toast{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top,0px));z-index:50;transform:translate(-50%,calc(-100% - 40px));visibility:hidden;background:var(--cream);color:var(--ink);font-weight:600;padding:12px 18px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.4);transition:transform .35s cubic-bezier(.3,1.4,.5,1);max-width:calc(100% - 32px);text-align:center}
 .toast.show{transform:translate(-50%,0);visibility:visible}
 [data-reveal]{transition:transform .8s cubic-bezier(.2,1.2,.4,1)}
@@ -437,6 +447,7 @@ html.centered .namegen{display:block}
 <div class="intro-text">
 <p class="presents">Dancing Images presents</p>
 <p class="tagline">The Nutcracker</p>
+<p class="credit">Directed by Carlos Renteria</p>
 </div>
 </div>
 <a class="btn big" data-ticket href="#tickets" id="heroCta">
@@ -680,7 +691,7 @@ Get Tickets
 <button class="gift" type="button" style="--c1:#1f7a47;--c2:#fff3df;--d:.6s" aria-expanded="false">
 <span class="lid"><span class="bow"></span></span><span class="box"></span>
 <span class="label">Hip Hop</span>
-<span class="note"><b>Hip Hop</b><span>The Land of Sweets gets a remix. Expect the bass to drop.</span></span>
+<span class="note"><b>Land of the Sweets</b><span>Our hip hop dancers take over the Land of the Sweets. Expect the bass to drop.</span></span>
 </button>
 <button class="gift" type="button" style="--c1:#f2c14e;--c2:#e3192f;--d:1.2s" aria-expanded="false">
 <span class="lid"><span class="bow"></span></span><span class="box"></span>
@@ -741,6 +752,7 @@ Get Tickets
 <a class="btn" data-ticket href="#tickets" tabindex="-1">Tickets</a>
 </div>
 </div>
+<button class="music" id="musicBtn" type="button" aria-pressed="false" aria-label="Holiday music"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 17.5V5.5l10-2v12" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><circle cx="6.5" cy="17.5" r="2.6" fill="currentColor"/><circle cx="16.5" cy="15.5" r="2.6" fill="currentColor"/><path class="slash" d="M3 3l18 18" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg><span class="music-tip" id="musicTip">Tap anywhere for music</span></button>
 <div class="toast" id="toast" role="status"></div>
 <script>
 /* ============ EDIT SHOW DETAILS HERE ============ */
@@ -753,7 +765,7 @@ dateLong: "Sunday, December 20, 2026",
 timesShort: "5 PM",
 timesLong: "5:00 PM · one show only",
 cityShort: "One show only",
-venue: "Theater to be announced",
+venue: "Marina Valley High School Theater",
 address: ""
 };
 /* ================================================ */
@@ -776,10 +788,11 @@ try { soundOn = localStorage.getItem('dgn-sound') !== 'off'; } catch (e) {}
 const setSoundUI = () => { $('#soundLabel').textContent = soundOn ? 'Sound on' : 'Sound off'; $('#soundBtn').setAttribute('aria-pressed', soundOn); $('#soundWaves').style.opacity = soundOn ? 1 : .15; };
 setSoundUI();
 $('#soundBtn').addEventListener('click', () => { soundOn = !soundOn; setSoundUI(); try { localStorage.setItem('dgn-sound', soundOn ? 'on' : 'off'); } catch (e) {} if (soundOn) bell(1046.5, .5); });
-function ctx() { if (!soundOn) return null; if (!ac || ac.state === 'closed') { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state !== 'running') { try { ac.resume(); } catch (e) {} } return ac; }
+function ctx() { if (!soundOn) return null; return audio(); }
+function audio() { if (!ac || ac.state === 'closed') { try { ac = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } } if (ac.state !== 'running') { try { ac.resume(); } catch (e) {} } return ac; }
 // phones start audio paused and pause it again after tab switches, calls or locking the screen: wake it on every touch
 try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {} // lets iPhone sound play with the silent switch on
-const wakeAudio = () => { const a = ctx(); if (!a || a._unlocked) return; try { const s = a.createBufferSource(); s.buffer = a.createBuffer(1, 1, 22050); s.connect(a.destination); s.start(0); a._unlocked = true; } catch (e) {} };
+const wakeAudio = () => { const a = soundOn || window.musicWanted ? audio() : null; if (!a || a._unlocked) return; try { const s = a.createBufferSource(); s.buffer = a.createBuffer(1, 1, 22050); s.connect(a.destination); s.start(0); a._unlocked = true; } catch (e) {} };
 ['pointerdown', 'touchend', 'keydown', 'click'].forEach(ev => addEventListener(ev, wakeAudio, { capture: true, passive: true }));
 document.addEventListener('visibilitychange', () => { if (!document.hidden && ac && ac.state !== 'running') { try { ac.resume(); } catch (e) {} } });
 addEventListener('pageshow', () => { if (ac && ac.state !== 'running') { try { ac.resume(); } catch (e) {} } });
@@ -1597,6 +1610,42 @@ measure(); update();
 if (window.ResizeObserver) new ResizeObserver(() => { measure(); kick(); }).observe(document.body);
 new IntersectionObserver(([en]) => { on = en.isIntersecting; town.classList.toggle('live', on); if (on) { measure(); kick(); } }, { rootMargin: '20% 0px' }).observe(town);
 addEventListener('scroll', kick, { passive: true });
+})();
+
+// background music: Jingle Bells (public domain) played on soft synth bells with a bass and sleigh bells.
+// Browsers only allow sound after a tap, so it starts on the first tap and the floating note button mutes it.
+(function music() {
+const btn = $('#musicBtn'), tip = $('#musicTip'); if (!btn) return;
+let want = true; try { want = localStorage.getItem('dgn-music') !== 'off'; } catch (e) {}
+window.musicWanted = want;
+const N = { C5: 523.25, D5: 587.33, E5: 659.25, F5: 698.46, G5: 783.99, A5: 880, C3: 130.81, D3: 146.83, F3: 174.61, G2: 98 };
+const mel = 'E5 1,E5 1,E5 2,E5 1,E5 1,E5 2,E5 1,G5 1,C5 1.5,D5 .5,E5 4,F5 1,F5 1,F5 1.5,F5 .5,F5 1,E5 1,E5 1,E5 .5,E5 .5,E5 1,D5 1,D5 1,E5 1,D5 2,G5 2,E5 1,E5 1,E5 2,E5 1,E5 1,E5 2,E5 1,G5 1,C5 1.5,D5 .5,E5 4,F5 1,F5 1,F5 1.5,F5 .5,F5 1,E5 1,E5 1,E5 .5,E5 .5,G5 1,G5 1,F5 1,D5 1,C5 4,- 4'.split(',').map(x => x.split(' '));
+const bass = 'C3 C3 C3 C3 F3 C3 D3 G2 C3 C3 C3 C3 F3 C3 G2 C3 -'.split(' '); // one per bar, played on beats 1 and 3
+const B = .34; // seconds per beat
+let gain = null, playing = false, timer = null, t0 = 0, s0 = 0, mi = 0, mt = 0, beat = 0, noise = null;
+const tone = (a, f, t, dur, vol, type = 'sine', partials = [[1, 1], [2.01, .3], [3.98, .08]]) => partials.forEach(([m, g]) => {
+const o = a.createOscillator(), v = a.createGain(); o.type = type; o.frequency.value = f * m;
+v.gain.setValueAtTime(0, t); v.gain.linearRampToValueAtTime(vol * g, t + .008); v.gain.exponentialRampToValueAtTime(.0001, t + dur / m);
+o.connect(v).connect(gain); o.start(t); o.stop(t + dur + .05); });
+const shake = (a, t, vol) => { if (!noise) { const len = a.sampleRate * .08; noise = a.createBuffer(1, len, a.sampleRate); const d = noise.getChannelData(0); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, 4); }
+const n = a.createBufferSource(), hp = a.createBiquadFilter(), v = a.createGain(); n.buffer = noise; hp.type = 'highpass'; hp.frequency.value = 7000; v.gain.value = vol; n.connect(hp).connect(v).connect(gain); n.start(t); };
+const pump = () => { const a = ac; if (!a || !playing) return; const ahead = a.currentTime + .25;
+while (t0 + mt * B < ahead) { const [n, d] = mel[mi], t = t0 + mt * B; if (n !== '-') tone(a, N[n], t, Math.max(.5, +d * B * 1.6), .16); mt += +d; mi++; if (mi === mel.length) { mi = 0; t0 += mt * B; mt = 0; } }
+// the bass runs on its own steady clock; the tune and the bass are both 68 beats long, so they stay together
+while (s0 + beat * B < ahead) { const bt = s0 + beat * B, r = bass[Math.floor(beat / 4) % bass.length]; if (r !== '-') { if (beat % 2 === 0) tone(a, N[r], bt, B * 1.8, .2, 'triangle', [[1, 1], [2, .25]]); shake(a, bt, beat % 2 ? .05 : .03); shake(a, bt + B / 2, .025); } beat++; } };
+const start = () => { const a = audio(); if (!a || playing) return; playing = true;
+if (!gain) { gain = a.createGain(); gain.connect(a.destination); }
+gain.gain.cancelScheduledValues(a.currentTime); gain.gain.setValueAtTime(0, a.currentTime); gain.gain.linearRampToValueAtTime(.5, a.currentTime + 1.2);
+t0 = s0 = a.currentTime + .15; mi = 0; mt = 0; beat = 0; clearInterval(timer); timer = setInterval(pump, 60); pump(); ui(); };
+const stop = () => { if (!playing) return; playing = false; clearInterval(timer); if (gain && ac) { gain.gain.cancelScheduledValues(ac.currentTime); gain.gain.setValueAtTime(gain.gain.value, ac.currentTime); gain.gain.linearRampToValueAtTime(0, ac.currentTime + .25); } ui(); };
+const ui = () => { btn.setAttribute('aria-pressed', playing); btn.setAttribute('aria-label', playing ? 'Mute holiday music' : 'Play holiday music'); };
+btn.addEventListener('click', e => { e.stopPropagation(); want = !playing; window.musicWanted = want; try { localStorage.setItem('dgn-music', want ? 'on' : 'off'); } catch (err) {} btn.classList.remove('hint'); want ? start() : stop(); });
+// first tap anywhere starts it (if they haven't muted it before)
+const first = e => { if (btn.contains(e.target)) return; ['pointerdown', 'keydown'].forEach(ev => removeEventListener(ev, first, true)); btn.classList.remove('hint'); if (want) start(); };
+['pointerdown', 'keydown'].forEach(ev => addEventListener(ev, first, true));
+if (want) { btn.classList.add('hint'); setTimeout(() => btn.classList.remove('hint'), 5000); }
+document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); else if (want && ac) start(); });
+ui();
 })();
 </script>
 </body>
