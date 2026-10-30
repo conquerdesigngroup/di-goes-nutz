@@ -266,7 +266,8 @@ transform-origin:0 100%;transform:scale(0);transition:transform .3s cubic-bezier
 .logo-wrap .logo-btn{width:100%;max-width:none;z-index:2}
 .logo-wrap .buddy{position:absolute;z-index:1;width:25%;right:-6%;top:13%;rotate:14deg;transform-origin:30% 90%}
 .logo-wrap .buddy svg{-webkit-mask-image:none;mask-image:none;overflow:visible}
-.logo-wrap .buddy-say{left:58%;bottom:auto;top:-14%;transform-origin:0 100%;rotate:-14deg}
+.logo-wrap>.buddy-say{left:93%;bottom:auto;top:3%;z-index:4;pointer-events:none}
+@media (max-width:819px){.logo-wrap>.buddy-say{left:auto;right:14%;top:4%;white-space:normal;width:max-content;max-width:min(46vw,180px);font-size:14px;line-height:1.15;text-align:center;padding:8px 11px;border-radius:14px 14px 4px 14px;transform-origin:100% 100%}}
 .buddy .wave{transform-box:fill-box;transform-origin:50% 5%;animation:wave 1.6s ease-in-out infinite}
 @keyframes wave{0%,100%{transform:rotate(-178deg)}50%{transform:rotate(-138deg)}}
 .buddy .grab{transform-box:fill-box;transform-origin:50% 5%;transform:rotate(128deg)}
@@ -440,8 +441,8 @@ html.centered .namegen{display:block}
 </div>
 <div class="wrap hero-grid">
 <div class="logo-wrap">
-<button class="buddy" id="buddy" type="button" aria-label="Nutcracker. Tap him to hear what he has to say.">
 <span class="buddy-say" id="buddySay" aria-live="polite">Psst!</span>
+<button class="buddy" id="buddy" type="button" aria-label="Nutcracker. Tap him to hear what he has to say.">
 <svg class="nc" viewBox="20 18 160 330" aria-hidden="true"></svg>
 </button>
 <button class="logo-btn" id="logoBtn" type="button" aria-label="DI Goes Nutz logo. Tap for confetti.">
