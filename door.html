@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>Door check-in · DI Goes Nutz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--pine:#0b3320;--fir:#145a34;--holly:#1f7a47;--gold:#f2c14e;--cream:#fff3df;--candy:#e3192f;--berry:#a50f22;--muted:#b9d3c1;--ink:#1a0f0a}
+*{box-sizing:border-box}
+body{margin:0;background:var(--pine);color:var(--cream);font-family:"Bricolage Grotesque",system-ui,sans-serif;min-height:100vh}
+main{max-width:560px;margin:0 auto;padding:20px 16px 48px}
+h1{font-family:"Bagel Fat One",system-ui;font-weight:400;color:var(--gold);font-size:34px;margin:4px 0 2px}
+.sub{color:var(--muted);margin:0 0 18px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.stat{background:var(--fir);border-radius:12px;padding:10px;text-align:center}
+.stat b{display:block;font-size:26px;color:var(--gold)}
+.stat span{font-size:12px;color:var(--muted)}
+form{display:flex;gap:8px}
+input{flex:1;min-width:0;font:700 20px "Space Mono",monospace;padding:14px;border-radius:12px;border:2px solid var(--gold);background:var(--cream);color:var(--ink);text-transform:uppercase}
+input::placeholder{text-transform:none;font-weight:400;font-size:16px}
+button{font:800 16px "Bricolage Grotesque",system-ui;padding:12px 16px;border-radius:12px;border:0;background:var(--gold);color:var(--ink);cursor:pointer}
+button.ghost{background:transparent;color:var(--muted);border:1px solid var(--muted);font-weight:600;padding:8px 12px;font-size:14px}
+.hint{font-size:13px;color:var(--muted);margin:8px 2px 16px}
+.card{background:var(--cream);color:var(--ink);border-radius:14px;padding:14px 16px;margin-top:10px;border-left:10px solid var(--holly)}
+.card.used{border-left-color:var(--gold)}
+.card.bad{border-left-color:var(--candy)}
+.code{font:700 22px "Space Mono",monospace}
+.who{font-weight:600;margin:2px 0}
+.meta{font-size:13px;color:#555}
+.badge{display:inline-block;font-size:12px;font-weight:800;letter-spacing:.06em;padding:3px 8px;border-radius:999px;margin-top:6px}
+.ok{background:#d8f2e1;color:var(--fir)}.warn{background:#fdecc0;color:#7a520a}.no{background:#fde0e3;color:var(--berry)}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.actions button{padding:10px 14px}
+.card .ghost{color:#555;border-color:#aaa}
+.msg{margin-top:12px;padding:12px 14px;border-radius:12px;font-weight:600}
+.msg.good{background:var(--holly)}.msg.err{background:var(--berry)}
+#gate{margin-top:30px}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<main>
+  <h1>Door check-in</h1>
+  <p class="sub">DI Goes Nutz · Sun Dec 20 · 5 PM</p>
+
+  <section id="gate">
+    <form id="pinForm"><input id="pin" type="password" inputmode="numeric" placeholder="Door PIN" autocomplete="off"><button>Open</button></form>
+    <div id="pinMsg"></div>
+  </section>
+
+  <section id="app" hidden>
+    <div class="stats">
+      <div class="stat"><b id="sSold">–</b><span>tickets sold</span></div>
+      <div class="stat"><b id="sIn">–</b><span>checked in</span></div>
+      <div class="stat"><b id="sLeft">–</b><span>still to arrive</span></div>
+    </div>
+    <form id="searchForm"><input id="q" placeholder="Ticket number or name" autocomplete="off" autocapitalize="characters"><button>Find</button></form>
+    <p class="hint">Type the ticket number (the part after NUTZ- is enough) or the buyer's name or email.</p>
+    <div id="msg"></div>
+    <div id="results"></div>
+    <p style="margin-top:28px"><button class="ghost" id="lock">Lock this device</button></p>
+  </section>
+</main>
+<script>
+const $ = (id) => document.getElementById(id);
+let pin = "";
+try { pin = localStorage.getItem("doorPin") || ""; } catch (e) {}
+
+async function api(action, data = {}) {
+  const res = await fetch("/api/door", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ pin, action, ...data }) });
+  const json = await res.json().catch(() => ({ error: "Server error" }));
+  if (res.status === 401) { lock(); throw new Error("Wrong PIN"); }
+  return { ok: res.ok, ...json };
+}
+
+function esc(s) { return String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
+function time(t) { return new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" }); }
+
+function show(text, good) { $("msg").innerHTML = text ? `<div class="msg ${good ? "good" : "err"}">${esc(text)}</div>` : ""; }
+
+function card(t) {
+  const refunded = t.status !== "valid";
+  const used = !!t.checked_in_at;
+  const cls = refunded ? "bad" : used ? "used" : "";
+  const badge = refunded ? `<span class="badge no">REFUNDED – DO NOT ADMIT</span>`
+    : used ? `<span class="badge warn">CHECKED IN AT ${time(t.checked_in_at)}</span>`
+    : `<span class="badge ok">VALID</span>`;
+  const btns = refunded ? "" : used
+    ? `<button class="ghost" data-act="undo" data-code="${esc(t.code)}">Undo check-in</button>`
+    : `<button data-act="checkin" data-code="${esc(t.code)}">Check in</button>`;
+  return `<div class="card ${cls}">
+    <div class="code">${esc(t.code)}</div>
+    <div class="who">${esc(t.buyer_name || "No name on order")}</div>
+    <div class="meta">${esc(t.buyer_email || "")} · ticket ${t.seat_no} of ${t.seats_in_order}${t.note ? " · " + esc(t.note) : ""}</div>
+    ${badge}
+    <div class="actions">${btns}<button class="ghost" data-act="resend" data-code="${esc(t.code)}">Resend email</button></div>
+  </div>`;
+}
+
+let last = [];
+function render(list) { last = list; $("results").innerHTML = list.map(card).join(""); }
+
+async function stats() {
+  const s = await api("stats");
+  $("sSold").textContent = s.sold; $("sIn").textContent = s.checked_in; $("sLeft").textContent = s.sold - s.checked_in;
+}
+
+async function search(q) {
+  show("");
+  const r = await api("search", { q });
+  if (!r.tickets.length) show("No tickets match that.", false);
+  render(r.tickets);
+}
+
+$("results").addEventListener("click", async (e) => {
+  const b = e.target.closest("button[data-act]");
+  if (!b) return;
+  b.disabled = true;
+  const { act, code } = b.dataset;
+  const r = await api(act, { code });
+  if (act === "resend") show(r.ok ? `Tickets re-sent to the buyer (${r.emailed}).` : r.error, r.ok);
+  else show(r.ok ? (act === "checkin" ? `Checked in ${code}. Enjoy the show!` : `Check-in undone for ${code}.`) : r.error, r.ok);
+  const updated = r.ticket;
+  if (updated) render(last.map((t) => (t.code === updated.code ? updated : t)));
+  b.disabled = false;
+  stats();
+});
+
+$("searchForm").addEventListener("submit", (e) => { e.preventDefault(); search($("q").value).catch((err) => show(err.message)); });
+
+$("pinForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  pin = $("pin").value.trim();
+  try { await stats(); unlock(); } catch (err) { $("pinMsg").innerHTML = `<div class="msg err">Wrong PIN</div>`; }
+});
+
+function unlock() {
+  try { localStorage.setItem("doorPin", pin); } catch (e) {}
+  $("gate").hidden = true; $("app").hidden = false; $("q").focus();
+}
+function lock() {
+  pin = ""; try { localStorage.removeItem("doorPin"); } catch (e) {}
+  $("gate").hidden = false; $("app").hidden = true;
+}
+$("lock").addEventListener("click", lock);
+
+if (pin) stats().then(unlock).catch(() => {});
+setInterval(() => { if (pin && !$("app").hidden) stats().catch(() => {}); }, 30000);
+</script>
+</body>
+</html>
