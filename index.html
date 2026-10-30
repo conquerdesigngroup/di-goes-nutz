@@ -336,6 +336,7 @@ transition:filter .12s,transform .12s;box-shadow:inset 0 -8px 14px rgba(0,0,0,.2
 .town .tl{position:absolute;inset:0}
 .town.live .tl{will-change:transform}
 .town svg{position:absolute;left:0;bottom:0;width:100%;height:100%;display:block;overflow:visible}
+.town svg.pbox{left:0;top:0;bottom:auto;width:0;height:0;will-change:transform}
 /* the town only animates while it's on screen, so it costs nothing while you scroll the top of the page */
 .town.live .win{animation:flick 5s ease-in-out infinite}
 .town.live .bulb{animation:twinkle 1.8s ease-in-out infinite}
@@ -344,6 +345,11 @@ transition:filter .12s,transform .12s;box-shadow:inset 0 -8px 14px rgba(0,0,0,.2
 @keyframes bob{50%{transform:translateY(-8px) rotate(-3deg)}}
 .finale .lede{margin:0 auto 30px}
 footer{padding:28px var(--gut-r) calc(110px + env(safe-area-inset-bottom,0px)) var(--gut-l);text-align:center;font-family:var(--mono);font-size:12px;color:var(--muted);letter-spacing:.06em;position:relative;z-index:1}
+.studio{display:block;width:min(240px,62vw);margin:0 auto 14px}
+.studio img{display:block;width:100%;height:auto;transition:transform .25s}
+a.studio[href]:hover img{transform:scale(1.04)}
+.studio-url{margin-bottom:10px}
+.studio-url a{color:var(--gold);font-size:14px;text-decoration:underline;text-underline-offset:3px}
 .dock{position:fixed;left:0;right:0;bottom:0;z-index:30;padding:10px var(--gut-r) calc(10px + env(safe-area-inset-bottom,0px)) var(--gut-l);
 background:linear-gradient(180deg,rgba(11,51,32,0),rgba(11,51,32,.92) 30%);transform:translateY(120%);transition:transform .35s cubic-bezier(.3,1.3,.5,1)}
 .dock.show{transform:none}
@@ -743,7 +749,9 @@ Get Tickets
 </section>
 </main>
 <footer>
-<p>Dancing Images Dance Company · DIDC</p>
+<a class="studio" id="studioLink"><img src="/assets/didc-logo.webp" width="640" height="168" alt="DIDC, Dancing Images Dance Center" loading="lazy"></a>
+<p class="studio-url" id="studioUrl" hidden><a></a></p>
+<p>Dancing Images Dance Center · DIDC</p>
 <p>DI Goes Nutz Holiday Show 2026</p>
 </footer>
 <div class="dock" id="dock" aria-hidden="true">
@@ -759,6 +767,7 @@ Get Tickets
 const SHOW = {
 placeholder: false,                       // show date and time confirmed in the 2026 packet
 ticketUrl: "",                            // paste the ticket link here when sales open
+studioUrl: "",                            // the dance studio's website, linked from the logo in the footer
 start: "2026-12-20T17:00:00-08:00",
 dateShort: "Sun · Dec 20",
 dateLong: "Sunday, December 20, 2026",
@@ -778,6 +787,7 @@ $$('[data-cfg]').forEach(el => { const v = SHOW[el.dataset.cfg]; if (v) el.textC
 $$('[data-sample]').forEach(el => el.hidden = !SHOW.placeholder);
 const toast = (msg) => { const t = $('#toast'); t.textContent = msg; t.classList.add('show'); clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2600); };
 $$('[data-ticket]').forEach(a => {
+if (SHOW.studioUrl) { const sl = $('#studioLink'), su = $('#studioUrl'); [sl, su.firstElementChild].forEach(el => { el.href = SHOW.studioUrl; el.target = '_blank'; el.rel = 'noopener'; }); su.firstElementChild.textContent = SHOW.studioUrl.replace(/^https?:\/\/(www\.)?/, '').replace(/\/$/, ''); su.hidden = false; }
 if (SHOW.ticketUrl) { a.href = SHOW.ticketUrl; a.target = "_blank"; a.rel = "noopener"; }
 else a.addEventListener('click', e => {
 if (a.closest('#tickets')) { e.preventDefault(); toast("Ticket sales open soon. Check back!"); }
@@ -974,9 +984,11 @@ set(j.a1, `translate(0 ${base.a1}) rotate(${d(a1)})`); set(j.e1, `translate(0 ${
 return { build, attach };
 })();
 nsvg.querySelector('defs').insertAdjacentHTML('beforeend', '<radialGradient id="poolGlow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".42"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>');
-const crew = [['ballerina', { skin: '#f2c7a5', hair: '#3a2116', bodice: '#e3192f', tutu: '#fff4f2', tutu2: '#ffc9d6', tights: '#f7d6cf', shoe: '#f4b3aa', ribbon: '#e48f86', trim: '#f2c14e' }],
+const LOOKS = [['ballerina', { skin: '#f2c7a5', hair: '#3a2116', bodice: '#e3192f', tutu: '#fff4f2', tutu2: '#ffc9d6', tights: '#f7d6cf', shoe: '#f4b3aa', ribbon: '#e48f86', trim: '#f2c14e' }],
 ['nutcracker', { skin: '#f6dcc0', coat: '#c8102e', coatDark: '#8a0a1f', pants: '#f4efe6', boot: '#16100c', gold: '#f2c14e', belt: '#f4efe6', glove: '#fbf7ef', hat: '#15110f', plume: '#e3192f' }],
-['ballerina', { skin: '#c68b62', hair: '#1c120c', bodice: '#8e3fa8', tutu: '#f8ecff', tutu2: '#d9b8ef', tights: '#f0d2d6', shoe: '#e8b4c4', ribbon: '#c98aa6', trim: '#f2c14e' }]].map(([kind, c]) => { const b = RIG.build(kind, c); const bx = box([-95, -185, 190, 200], `<g class="dancer">${b.svg}</g>`); return { ...bx, pose: RIG.attach(bx.el.firstElementChild, b) }; });
+['ballerina', { skin: '#c68b62', hair: '#1c120c', bodice: '#8e3fa8', tutu: '#f8ecff', tutu2: '#d9b8ef', tights: '#f0d2d6', shoe: '#e8b4c4', ribbon: '#c98aa6', trim: '#f2c14e' }]];
+window.DancerRig = { RIG, LOOKS };
+const crew = LOOKS.map(([kind, c]) => { const b = RIG.build(kind, c); const bx = box([-95, -185, 190, 200], `<g class="dancer">${b.svg}</g>`); return { ...bx, pose: RIG.attach(bx.el.firstElementChild, b) }; });
 const nuts = [0, 1, 2].map(() => box([-16, -16, 32, 32], '<g class="wnut"><ellipse cx="0" cy="0" rx="14" ry="12" fill="#9a6232"/><path d="M0 -12v24M-8 -6q4 6 0 12M8 -6q-4 6 0 12" stroke="#6b3f1c" stroke-width="2" fill="none" stroke-linecap="round"/><ellipse cx="-5" cy="-5" rx="4" ry="2.4" fill="#c58a52" opacity=".8"/></g>'));
 // map hill coordinates to pixels the way the hill's svg does (xMidYMax slice); refreshed on resize only
 let mk = 1, mox = 0, moy = 0, cachedW = 0;
@@ -1599,7 +1611,16 @@ const h3 = hill(392, 10, 5, .6); const b3 = `<path d="${h3.d}" fill="url(#tg3)"/
 const side = (cls, xs) => { let t = ''; xs.forEach(([x, h]) => t += pine(x, 700, h, '#062216', 'rgba(225,238,240,.6)')); return `<div class="tl ${cls}"><svg viewBox="0 0 400 700" preserveAspectRatio="x${cls === 'tl-l' ? 'Min' : 'Max'}YMax meet">${t}</svg></div>`; };
 const grad = (id, a, b) => `<linearGradient id="${id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${a}"/><stop offset="1" stop-color="${b}"/></linearGradient>`;
 town.innerHTML = `<div class="tl t1">${svg(b1, grad('tg1', '#2c5c52', '#0f3626'))}</div><div class="tl t2">${svg(b2, grad('tg2', '#3a6c64', '#0e3424') + '<radialGradient id="tglow"><stop offset="0" stop-color="#ffcf6b" stop-opacity=".2"/><stop offset="1" stop-color="#ffcf6b" stop-opacity="0"/></radialGradient>')}</div><div class="tl t3">${svg(b3, grad('tg3', '#2b564c', '#0b3320').replace('offset="1"', 'offset=".55"'))}</div>` + side('tl-l', [[30, 520], [170, 340]]) + side('tl-r', [[370, 540], [230, 350]]);
+// the same dancers parade across the snow in a loop, spaced evenly so someone is always on stage, each in its own little layer
+const t3 = town.querySelector('.t3'), DR = window.DancerRig, VB = [-95, -185, 190, 200];
+const parade = DR ? DR.LOOKS.map(([kind, c]) => { const b = DR.RIG.build(kind, c); t3.insertAdjacentHTML('beforeend', `<svg class="pbox" viewBox="${VB.join(' ')}"><g>${b.svg}</g></svg>`); const el = t3.lastElementChild; return { el, pose: DR.RIG.attach(el.firstElementChild, b) }; }) : [];
+let pk = 1, pw = 0, ph = 0, gy = 0, sz = .55;
+const psize = () => { pw = town.offsetWidth; ph = town.offsetHeight; pk = Math.max(pw / W, ph / H); gy = ph - (H - 396) * pk; sz = pw < 700 ? .62 : .6; parade.forEach(p => { p.el.style.width = (VB[2] * pk * sz).toFixed(1) + 'px'; p.el.style.height = (VB[3] * pk * sz).toFixed(1) + 'px'; }); };
+const march = ms => { const t = ms / 1000, u = pk * sz, span = pw + 360 * u; parade.forEach((p, i) => { const x = ((t * (pw < 700 ? 38 : 58) + i * span / parade.length) % span) - 180 * u; p.el.style.transform = `translate3d(${(x + VB[0] * u).toFixed(1)}px,${(gy + VB[1] * u).toFixed(1)}px,0)`; p.pose(t * 1.15 + i * 2.6); }); };
+psize(); march(4000); addEventListener('resize', () => { psize(); march(performance.now()); });
+if (window.ResizeObserver) new ResizeObserver(psize).observe(town);
 if (reduce) return;
+let pr = 0; const loop = ms => { march(ms); pr = on ? requestAnimationFrame(loop) : 0; };
 const L = [['.t1', 50, 0], ['.t2', 110, 0], ['.t3', 170, 0], ['.tl-l', 140, -1], ['.tl-r', 140, 1]].map(([c, dy, dx]) => [town.querySelector(c), dy, dx]);
 let q = false, on = false, top = 0;
 const measure = () => { top = town.getBoundingClientRect().top + scrollY; };
@@ -1608,7 +1629,7 @@ L.forEach(([el, dy, dx]) => el.style.transform = `translate3d(${(1 - e) * dx * 3
 const kick = () => { if (on && !q) { q = true; requestAnimationFrame(update); } };
 measure(); update();
 if (window.ResizeObserver) new ResizeObserver(() => { measure(); kick(); }).observe(document.body);
-new IntersectionObserver(([en]) => { on = en.isIntersecting; town.classList.toggle('live', on); if (on) { measure(); kick(); } }, { rootMargin: '20% 0px' }).observe(town);
+new IntersectionObserver(([en]) => { on = en.isIntersecting; town.classList.toggle('live', on); if (on) { measure(); kick(); if (!pr) pr = requestAnimationFrame(loop); } }, { rootMargin: '20% 0px' }).observe(town);
 addEventListener('scroll', kick, { passive: true });
 })();
 
