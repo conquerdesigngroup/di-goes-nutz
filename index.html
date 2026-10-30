@@ -42,9 +42,9 @@ a{color:inherit}
 :focus-visible{outline:3px solid var(--gold);outline-offset:3px;border-radius:6px}
 h1,h2,h3{font-family:var(--display);font-weight:400;line-height:1.02;text-wrap:balance;margin:0;letter-spacing:.01em}
 p{margin:0}
-#snow{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none}
+#snow{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:0;pointer-events:none}
 /* ---------- winter scene behind the hero + countdown: layered hills and pines that dolly in as you scroll ---------- */
-#scene{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
+#scene{position:fixed;left:0;right:0;top:0;height:100vh;height:100lvh;z-index:0;pointer-events:none;overflow:hidden;contain:strict}
 #scene .ly{position:absolute;left:0;right:0;bottom:0;width:100%;will-change:transform;transform-origin:50% 100%}
 #scene .ly svg{position:absolute;left:0;bottom:0;width:100%;height:100%;display:block;overflow:visible}
 #scene .sky{top:0;bottom:auto;height:60%}
@@ -77,8 +77,9 @@ p{margin:0}
 @keyframes rise{from{translate:0 14%;opacity:0}}
 html.js #scene .ly{animation:rise 1.6s cubic-bezier(.2,.8,.2,1) both}
 html.js #scene .far{animation-delay:.1s}html.js #scene .mid{animation-delay:.25s}html.js #scene .near{animation-delay:.4s}html.js #scene .side{animation-delay:.55s}
+@media (pointer:coarse){#scene .twinkle,#scene .bulb,#scene .win{animation:none}#scene .puff{animation:none;opacity:.35}}
 @media (prefers-reduced-motion:reduce){#scene .fog i,#scene .twinkle,#scene .bulb,#scene .aurora i,#scene .puff,#scene .win,html.js #scene .ly{animation:none}#scene .shoot{display:none}}
-#fx{position:fixed;inset:0;width:100%;height:100%;z-index:40;pointer-events:none}
+#fx{position:fixed;left:0;top:0;width:100%;height:100vh;height:100lvh;z-index:40;pointer-events:none}
 main{position:relative;z-index:1;overflow-x:clip}
 html,body{overflow-x:clip}
 .band{padding-left:var(--gut-l);padding-right:var(--gut-r);padding-block:60px}
@@ -152,6 +153,25 @@ box-shadow:0 8px 0 rgba(0,0,0,.22);transform:rotate(var(--r,0deg))}
 .tag.tick b{animation:tick .35s ease}
 @keyframes tick{40%{transform:translateY(-4px) scale(1.08)}}
 .count-done{font-family:var(--display);font-size:40px;color:var(--gold)}
+/* ---------- arcade: one horizontal game picker ---------- */
+.arcade{padding-bottom:40px}
+.arcade .sec-head{margin-bottom:18px}
+.picker{display:flex;gap:14px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x mandatory;scroll-padding-inline:var(--gut-l);padding:10px var(--gut-r) 22px var(--gut-l);scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.picker::-webkit-scrollbar{display:none}
+@media (min-width:1100px){.picker{justify-content:center}}
+.gcard{flex:0 0 auto;width:min(58vw,200px);scroll-snap-align:center;border:0;border-radius:22px;padding:18px 16px 16px;text-align:left;display:grid;gap:5px;align-content:start;color:#fff;background:linear-gradient(160deg,var(--c),var(--d));box-shadow:0 10px 22px rgba(0,0,0,.35);transform:scale(.93);opacity:.78;transition:transform .3s cubic-bezier(.3,1.4,.5,1),opacity .25s,box-shadow .25s;touch-action:manipulation}
+.gcard:hover{opacity:.95}
+.gcard[aria-selected="true"]{transform:scale(1);opacity:1;box-shadow:0 0 0 3px var(--gold),0 14px 30px rgba(0,0,0,.45)}
+.gc-ico{font-size:40px;line-height:1.1}
+.gcard b{font-family:var(--display);font-weight:400;font-size:22px;line-height:1.05}
+.gcard small{font-size:14px;opacity:.9}
+.gcard i{font-style:normal;justify-self:start;margin-top:8px;background:rgba(255,255,255,.2);border-radius:999px;padding:5px 12px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase}
+.gcard[aria-selected="true"] i{background:var(--gold);color:var(--ink)}
+.panels{padding-inline:var(--gut-l) var(--gut-r)}
+.gpanel{padding-block:24px 8px;animation:panelIn .45s cubic-bezier(.2,.8,.2,1) both}
+.gpanel[hidden]{display:none}
+@keyframes panelIn{from{opacity:0;transform:translateY(18px)}}
+@media (prefers-reduced-motion:reduce){.gpanel{animation:none}.gcard{transition:none}}
 .workshop{background:linear-gradient(180deg,transparent,rgba(0,0,0,.22) 18%,rgba(0,0,0,.22) 82%,transparent)}
 .game{display:grid;gap:28px;align-items:center}
 .stage{position:relative;justify-self:center;width:min(78vw,300px);aspect-ratio:200/440;max-width:100%;touch-action:manipulation;cursor:pointer;border:0;background:none;padding:0}
@@ -426,23 +446,24 @@ Get Tickets
 </div>
 </div>
 </div>
-<!-- COUNTDOWN -->
-<section class="band countdown" aria-labelledby="cdTitle">
-<div class="wrap" data-reveal>
+<!-- GAMES: one picker for every mini game -->
+<section class="band arcade" id="games" aria-labelledby="arcadeTitle">
+<div class="wrap">
 <div class="sec-head">
-<span class="eyebrow">Curtain up in <span class="sample" data-sample hidden>sample date</span></span>
-<h2 id="cdTitle">Almost <span class="red">showtime</span></h2>
-</div>
-<div class="tags" id="tags" role="timer" aria-live="off">
-<div class="tag"><b id="cdD">00</b><small>days</small></div>
-<div class="tag"><b id="cdH">00</b><small>hours</small></div>
-<div class="tag"><b id="cdM">00</b><small>mins</small></div>
-<div class="tag"><b id="cdS">00</b><small>secs</small></div>
+<span class="eyebrow">The Nutcracker's arcade</span>
+<h2 id="arcadeTitle">Pick <span class="red">a game</span></h2>
+<p class="lede">Swipe through the games and tap one to play.</p>
 </div>
 </div>
-</section>
-<!-- GAME -->
-<section class="band workshop" aria-labelledby="gameTitle">
+<div class="picker" role="tablist" aria-label="Choose a mini game">
+<button class="gcard" type="button" role="tab" id="gt-crack" aria-controls="gp-crack" aria-selected="true" tabindex="0" data-game="crack" style="--c:#e3192f;--d:#7d0e1b"><span class="gc-ico" aria-hidden="true">🌰</span><b>Crack a Nut</b><small>Chomp the flying walnuts</small><i>Playing</i></button>
+<button class="gcard" type="button" role="tab" id="gt-mice" aria-controls="gp-mice" aria-selected="false" tabindex="-1" data-game="mice" style="--c:#6d6f7d;--d:#2b2c35"><span class="gc-ico" aria-hidden="true">🐭</span><b>Bonk the Mice</b><small>Beat the Mouse King</small><i>Play</i></button>
+<button class="gcard" type="button" role="tab" id="gt-lights" aria-controls="gp-lights" aria-selected="false" tabindex="-1" data-game="lights" style="--c:#e0a51c;--d:#7a520a"><span class="gc-ico" aria-hidden="true">💡</span><b>Follow the Lights</b><small>Memory test</small><i>Play</i></button>
+<button class="gcard" type="button" role="tab" id="gt-sweets" aria-controls="gp-sweets" aria-selected="false" tabindex="-1" data-game="sweets" style="--c:#d6458c;--d:#6e1b49"><span class="gc-ico" aria-hidden="true">🍬</span><b>Catch the Sweets</b><small>Dodge the coal</small><i>Play</i></button>
+<button class="gcard" type="button" role="tab" id="gt-name" aria-controls="gp-name" aria-selected="false" tabindex="-1" data-game="name" style="--c:#1f7a47;--d:#0b3a22"><span class="gc-ico" aria-hidden="true">🎖️</span><b>Nutcracker Name</b><small>Find yours</small><i>Play</i></button>
+</div>
+<div class="panels">
+<div class="gpanel workshop" id="gp-crack" role="tabpanel" aria-labelledby="gt-crack">
 <div class="wrap">
 <div class="sec-head" data-reveal>
 <span class="eyebrow">The Nutcracker's workshop</span>
@@ -526,6 +547,110 @@ Get Tickets
 </div>
 </div>
 </div>
+</div>
+<div class="gpanel " id="gp-mice" role="tabpanel" aria-labelledby="gt-mice" hidden>
+<div class="wrap">
+<div class="sec-head" data-reveal>
+<span class="eyebrow">Battle of the Mouse King</span>
+<h2 id="miceTitle">Bonk <span class="red">the mice</span></h2>
+<p class="lede">The Mouse King's army is sneaking out of the walls. Tap them before they duck back in. The King himself is worth 5.</p>
+</div>
+<div class="arena" data-reveal>
+<div class="hud">
+<div><span class="hud-k">Score</span><b id="mkScore">0</b></div>
+<div class="timer"><span id="mkTime"></span></div>
+<div><span class="hud-k">Best</span><b id="mkBest">0</b></div>
+</div>
+<div class="holes" id="holes"></div>
+<div class="arena-cover" id="mkCover">
+<p class="cover-title" id="mkTitle">Ready, soldier?</p>
+<p class="cover-sub" id="mkSub">20 seconds. Tap every mouse you see.</p>
+<button class="btn" id="mkStart" type="button">Start the battle</button>
+<a class="btn ghost" id="mkTix" data-ticket href="#tickets" hidden>Get tickets</a>
+</div>
+</div>
+</div>
+</div>
+<div class="gpanel " id="gp-lights" role="tabpanel" aria-labelledby="gt-lights" hidden>
+<div class="wrap">
+<div class="sec-head" data-reveal>
+<span class="eyebrow">Mini-game · memory</span>
+<h2 id="simonTitle">Follow <span class="red">the lights</span></h2>
+<p class="lede">Watch the bulbs blink, then tap them back in the same order. Every round adds one more.</p>
+</div>
+<div class="simon" data-reveal>
+<div class="simon-wire" aria-hidden="true"></div>
+<div class="simon-bulbs" id="simonBulbs">
+<button class="sbulb" type="button" style="--c:#e3192f" aria-label="Red light"></button>
+<button class="sbulb" type="button" style="--c:#f2c14e" aria-label="Gold light"></button>
+<button class="sbulb" type="button" style="--c:#2fbf6a" aria-label="Green light"></button>
+<button class="sbulb" type="button" style="--c:#4fb3ff" aria-label="Blue light"></button>
+</div>
+<p class="simon-status" id="simonStatus" aria-live="polite">Can you get past round 8?</p>
+<div class="simon-row">
+<button class="btn" id="simonStart" type="button">Start</button>
+<span class="best" id="simonBest"></span>
+</div>
+</div>
+</div>
+</div>
+<div class="gpanel " id="gp-sweets" role="tabpanel" aria-labelledby="gt-sweets" hidden>
+<div class="wrap">
+<div class="sec-head" data-reveal>
+<span class="eyebrow">Mini-game · Land of Sweets</span>
+<h2 id="catchTitle">Catch <span class="red">the sweets</span></h2>
+<p class="lede">Slide your stocking to catch candy canes and peppermints. Sugar plums are worth 3. Dodge the coal, you only get 3 hearts.</p>
+</div>
+<div class="catch" id="catchBox" data-reveal>
+<div class="hud">
+<div><span class="hud-k">Score</span><b id="ctScore">0</b></div>
+<div class="hearts" id="ctHearts" aria-label="3 hearts left">♥♥♥</div>
+<div><span class="hud-k">Best</span><b id="ctBest">0</b></div>
+</div>
+<canvas id="catchCv" aria-label="Catch the sweets game area"></canvas>
+<div class="arena-cover" id="ctCover">
+<p class="cover-title" id="ctTitle">Sweet tooth?</p>
+<p class="cover-sub" id="ctSub">Drag left and right to move your stocking.</p>
+<button class="btn" id="ctStart" type="button">Play</button>
+</div>
+</div>
+</div>
+</div>
+<div class="gpanel " id="gp-name" role="tabpanel" aria-labelledby="gt-name" hidden>
+<div class="wrap namegen">
+<div class="sec-head" data-reveal>
+<span class="eyebrow">Every soldier needs one</span>
+<h2 id="nameTitle">What's your <span class="red">Nutcracker name?</span></h2>
+<p class="lede">Type your first name, or leave it blank and let fate decide.</p>
+</div>
+<form class="name-form" id="nameForm" data-reveal autocomplete="off">
+<label class="sr" for="nameIn">Your first name</label>
+<input id="nameIn" name="nameIn" type="text" maxlength="24" placeholder="Your first name" enterkeyhint="go">
+<button class="btn" type="submit">Spin</button>
+</form>
+<div class="nametag" id="nametag" data-reveal>
+<div class="nt-top"><b>HELLO</b><span>my Nutcracker name is</span></div>
+<div class="nt-name" id="ntName">Captain Sugar McCrunch</div>
+<button class="nt-copy" id="ntCopy" type="button">Copy my name</button>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- COUNTDOWN -->
+<section class="band countdown" aria-labelledby="cdTitle">
+<div class="wrap" data-reveal>
+<div class="sec-head">
+<span class="eyebrow">Curtain up in <span class="sample" data-sample hidden>sample date</span></span>
+<h2 id="cdTitle">Almost <span class="red">showtime</span></h2>
+</div>
+<div class="tags" id="tags" role="timer" aria-live="off">
+<div class="tag"><b id="cdD">00</b><small>days</small></div>
+<div class="tag"><b id="cdH">00</b><small>hours</small></div>
+<div class="tag"><b id="cdM">00</b><small>mins</small></div>
+<div class="tag"><b id="cdS">00</b><small>secs</small></div>
+</div>
+</div>
 </section>
 <!-- GIFTS -->
 <section class="band" aria-labelledby="giftTitle">
@@ -560,30 +685,6 @@ Get Tickets
 <p class="gifts-foot">Dancers ages 4 and up · the whole DI family on one stage</p>
 </div>
 </section>
-<!-- MOUSE KING -->
-<section class="band" id="mice" aria-labelledby="miceTitle">
-<div class="wrap">
-<div class="sec-head" data-reveal>
-<span class="eyebrow">Battle of the Mouse King</span>
-<h2 id="miceTitle">Bonk <span class="red">the mice</span></h2>
-<p class="lede">The Mouse King's army is sneaking out of the walls. Tap them before they duck back in. The King himself is worth 5.</p>
-</div>
-<div class="arena" data-reveal>
-<div class="hud">
-<div><span class="hud-k">Score</span><b id="mkScore">0</b></div>
-<div class="timer"><span id="mkTime"></span></div>
-<div><span class="hud-k">Best</span><b id="mkBest">0</b></div>
-</div>
-<div class="holes" id="holes"></div>
-<div class="arena-cover" id="mkCover">
-<p class="cover-title" id="mkTitle">Ready, soldier?</p>
-<p class="cover-sub" id="mkSub">20 seconds. Tap every mouse you see.</p>
-<button class="btn" id="mkStart" type="button">Start the battle</button>
-<a class="btn ghost" id="mkTix" data-ticket href="#tickets" hidden>Get tickets</a>
-</div>
-</div>
-</div>
-</section>
 <!-- TICKET -->
 <section class="band" id="tickets" aria-labelledby="tixTitle">
 <div class="wrap">
@@ -607,73 +708,6 @@ Get Tickets
 <div class="barcode" aria-hidden="true"></div>
 </div>
 </article>
-</div>
-</section>
-<!-- FOLLOW THE LIGHTS -->
-<section class="band" aria-labelledby="simonTitle">
-<div class="wrap">
-<div class="sec-head" data-reveal>
-<span class="eyebrow">Mini-game · memory</span>
-<h2 id="simonTitle">Follow <span class="red">the lights</span></h2>
-<p class="lede">Watch the bulbs blink, then tap them back in the same order. Every round adds one more.</p>
-</div>
-<div class="simon" data-reveal>
-<div class="simon-wire" aria-hidden="true"></div>
-<div class="simon-bulbs" id="simonBulbs">
-<button class="sbulb" type="button" style="--c:#e3192f" aria-label="Red light"></button>
-<button class="sbulb" type="button" style="--c:#f2c14e" aria-label="Gold light"></button>
-<button class="sbulb" type="button" style="--c:#2fbf6a" aria-label="Green light"></button>
-<button class="sbulb" type="button" style="--c:#4fb3ff" aria-label="Blue light"></button>
-</div>
-<p class="simon-status" id="simonStatus" aria-live="polite">Can you get past round 8?</p>
-<div class="simon-row">
-<button class="btn" id="simonStart" type="button">Start</button>
-<span class="best" id="simonBest"></span>
-</div>
-</div>
-</div>
-</section>
-<!-- CATCH THE SWEETS -->
-<section class="band" aria-labelledby="catchTitle">
-<div class="wrap">
-<div class="sec-head" data-reveal>
-<span class="eyebrow">Mini-game · Land of Sweets</span>
-<h2 id="catchTitle">Catch <span class="red">the sweets</span></h2>
-<p class="lede">Slide your stocking to catch candy canes and peppermints. Sugar plums are worth 3. Dodge the coal, you only get 3 hearts.</p>
-</div>
-<div class="catch" id="catchBox" data-reveal>
-<div class="hud">
-<div><span class="hud-k">Score</span><b id="ctScore">0</b></div>
-<div class="hearts" id="ctHearts" aria-label="3 hearts left">♥♥♥</div>
-<div><span class="hud-k">Best</span><b id="ctBest">0</b></div>
-</div>
-<canvas id="catchCv" aria-label="Catch the sweets game area"></canvas>
-<div class="arena-cover" id="ctCover">
-<p class="cover-title" id="ctTitle">Sweet tooth?</p>
-<p class="cover-sub" id="ctSub">Drag left and right to move your stocking.</p>
-<button class="btn" id="ctStart" type="button">Play</button>
-</div>
-</div>
-</div>
-</section>
-<!-- NAME GENERATOR -->
-<section class="band" aria-labelledby="nameTitle">
-<div class="wrap namegen">
-<div class="sec-head" data-reveal>
-<span class="eyebrow">Every soldier needs one</span>
-<h2 id="nameTitle">What's your <span class="red">Nutcracker name?</span></h2>
-<p class="lede">Type your first name, or leave it blank and let fate decide.</p>
-</div>
-<form class="name-form" id="nameForm" data-reveal autocomplete="off">
-<label class="sr" for="nameIn">Your first name</label>
-<input id="nameIn" name="nameIn" type="text" maxlength="24" placeholder="Your first name" enterkeyhint="go">
-<button class="btn" type="submit">Spin</button>
-</form>
-<div class="nametag" id="nametag" data-reveal>
-<div class="nt-top"><b>HELLO</b><span>my Nutcracker name is</span></div>
-<div class="nt-name" id="ntName">Captain Sugar McCrunch</div>
-<button class="nt-copy" id="ntCopy" type="button">Copy my name</button>
-</div>
 </div>
 </section>
 <!-- CAST -->
@@ -769,15 +803,18 @@ const g = a.createGain(); g.gain.value = .9; n.connect(bp).connect(g).connect(a.
 const o = a.createOscillator(), v = a.createGain(); o.frequency.setValueAtTime(180, t); o.frequency.exponentialRampToValueAtTime(60, t + .1);
 v.gain.setValueAtTime(.35, t); v.gain.exponentialRampToValueAtTime(.001, t + .12); o.connect(v).connect(a.destination); o.start(t); o.stop(t + .14);
 }
+const lvh = document.createElement('div'); lvh.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100vh;height:100lvh;visibility:hidden;pointer-events:none'; document.body.appendChild(lvh);
+let stableW = innerWidth, stableH = Math.max(innerHeight, lvh.offsetHeight);
+addEventListener('resize', () => { if (innerWidth !== stableW) { stableW = innerWidth; stableH = Math.max(innerHeight, lvh.offsetHeight); } });
 // the hero melts away as soon as you start scrolling, handing the screen to the winter scene
 (function heroFade() {
 const els = [$('.hero-grid'), $('.hero .lights')].filter(Boolean); let q = false;
-const run = () => { q = false; const t = Math.min(1, Math.max(0, scrollY / (innerHeight * .55))), e = t * t * (3 - 2 * t);
+const run = () => { q = false; const t = Math.min(1, Math.max(0, scrollY / (stableH * .55))), e = t * t * (3 - 2 * t);
 els.forEach(el => { el.style.opacity = (1 - e).toFixed(3); el.style.transform = reduce ? '' : `translate3d(0,${(-e * 40).toFixed(1)}px,0)`; el.style.pointerEvents = e > .9 ? 'none' : ''; }); };
 addEventListener('scroll', () => { if (!q) { q = true; requestAnimationFrame(run); } }, { passive: true }); run();
 })();
 (function scene() {
-const root = $('#scene'), stop = $('.workshop'); if (!root || !stop) return;
+const root = $('#scene'), stop = $('#games'); if (!root || !stop) return;
 let seed = 7; const rnd = (a = 0, b = 1) => { seed = (seed * 16807) % 2147483647; return a + (b - a) * (seed / 2147483647); };
 const W = 1600;
 // one snowy pine: stacked tiers, each with a snow lip
@@ -836,14 +873,16 @@ nuts.forEach((g, i) => { const dist = raw * 1500 + i * 260, x = 1520 - dist, r =
 placeCrew(0);
 const L = { sleigh: root.querySelector('.sleigh'), sky: root.querySelector('.sky'), far: root.querySelector('.far'), mid: root.querySelector('.mid'), near: root.querySelector('.near'), l: root.querySelector('.side.l'), r: root.querySelector('.side.r'), fog: root.querySelector('.fog') };
 if (reduce) return;
-let q = false, px = 0, tx = 0, py = 0, ty = 0;
+let q = false, px = 0, tx = 0, py = 0, ty = 0, stopTop = stop.offsetTop;
+const measure = () => { stopTop = stop.getBoundingClientRect().top + scrollY; kick(); };
+if (window.ResizeObserver) new ResizeObserver(measure).observe(document.body); addEventListener('load', measure);
 const ease = t => 1 - Math.pow(1 - t, 2), clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
 // motion builds with scroll: the hero view stays calm, then the forest rushes past
 const update = () => { q = false;
-const vh = innerHeight, vw = innerWidth, end = Math.max(1, stop.offsetTop - vh * .35), raw = clamp(scrollY / end), p = ease(raw);
-const top = stop.getBoundingClientRect().top, fade = clamp((top - vh * .5) / (vh * .5)), late = 1 - Math.max(0, (p - .55) / .45) * .85;
+const vh = stableH, vw = stableW, end = Math.max(1, stopTop - vh * .35), raw = clamp(scrollY / end), p = ease(raw);
+const top = stopTop - scrollY, fade = clamp((top - vh * .5) / (vh * .5)), late = 1 - Math.max(0, (p - .55) / .45) * .85;
 root.style.opacity = fade; root.style.visibility = fade < .01 ? 'hidden' : 'visible'; if (fade < .01) return;
-px += (tx - px) * .08; py += (ty - py) * .08; if (Math.abs(tx - px) > .002 || Math.abs(ty - py) > .002) kick();
+px += (tx - px) * .06; py += (ty - py) * .06; if (Math.abs(tx - px) > .002 || Math.abs(ty - py) > .002) kick();
 placeCrew(raw);
 const rise = clamp(raw / .35), sweep = clamp((raw - .3) / .7), sw = ease(sweep);
 L.sky.style.transform = `translate3d(${px * -6}px,${p * vh * .1 + py * -4}px,0)`;
@@ -861,8 +900,9 @@ L.sleigh.style.transform = `translate3d(${vw * (1.1 - k * 1.35)}px,${sy}px,0) ro
 const kick = () => { if (!q) { q = true; requestAnimationFrame(update); } };
 addEventListener('pointermove', e => { if (e.pointerType === 'mouse') { tx = e.clientX / innerWidth * 2 - 1; ty = e.clientY / innerHeight * 2 - 1; kick(); } }, { passive: true });
 // phones: tilt the device to shift the layers (iPhones ask permission once, on the first tap)
-let beta0 = null;
-const onTilt = e => { if (e.gamma == null) return; if (beta0 === null) beta0 = e.beta; tx = clamp(e.gamma / 25, -1, 1); ty = clamp((e.beta - beta0) / 25, -1, 1); kick(); };
+// side-to-side tilt only (front/back changes constantly while you scroll), with a dead zone and a slowly re-centering rest angle
+let g0 = null;
+const onTilt = e => { if (e.gamma == null) return; if (g0 === null) g0 = e.gamma; g0 += (e.gamma - g0) * .01; let d = e.gamma - g0; d = Math.abs(d) < 3 ? 0 : d - Math.sign(d) * 3; const n = clamp(d / 30, -.6, .6); if (Math.abs(n - tx) > .01) { tx = n; kick(); } };
 const DOE = window.DeviceOrientationEvent;
 if (DOE && typeof DOE.requestPermission === 'function') addEventListener('touchend', () => { DOE.requestPermission().then(r => { if (r === 'granted') addEventListener('deviceorientation', onTilt); }).catch(() => {}); }, { once: true, passive: true });
 else if (DOE && matchMedia('(pointer:coarse)').matches) addEventListener('deviceorientation', onTilt);
@@ -870,7 +910,7 @@ addEventListener('scroll', kick, { passive: true }); addEventListener('resize', 
 })();
 const sc = $('#snow'), sx = sc.getContext('2d'); let flakes = [], W = 0, H = 0, dpr = 1;
 function sizeSnow() {
-dpr = Math.min(2, devicePixelRatio || 1); W = innerWidth; H = innerHeight;
+dpr = Math.min(matchMedia('(pointer:coarse)').matches ? 1.5 : 2, devicePixelRatio || 1); W = innerWidth; H = Math.max(innerHeight, sc.clientHeight);
 [sc, fc].forEach(c => { c.width = W * dpr; c.height = H * dpr; c.getContext('2d').setTransform(dpr, 0, 0, dpr, 0, 0); });
 const n = reduce ? 0 : Math.round(Math.min(140, W / 6));
 flakes = Array.from({ length: n }, () => ({ x: Math.random() * W, y: Math.random() * H, r: Math.random() * 2.6 + .6, s: Math.random() * .6 + .3, p: Math.random() * 6.28, vx: 0, vy: 0 }));
@@ -888,14 +928,15 @@ addEventListener('touchend', () => { pX = pY = null; }, { passive: true });
 addEventListener('pointerdown', e => { for (const f of flakes) { const dx = f.x - e.clientX, dy = f.y - e.clientY, d2 = dx * dx + dy * dy; if (d2 < 22000) { const d = Math.sqrt(d2) || 1, k = (1 - d2 / 22000) * 7; f.vx += dx / d * k; f.vy += dy / d * k; } } }, { passive: true });
 let rush = 0;
 function drawSnow() {
-sx.clearRect(0, 0, W, H); sx.fillStyle = 'rgba(255,255,255,.85)';
+sx.clearRect(0, 0, W, H); sx.fillStyle = '#fff'; const b0 = [], b1 = [], b2 = [];
 const dy = scrollY - lastY; lastY = scrollY; wind += (dy * .02 - wind) * .1; rush += (Math.min(5, Math.abs(dy) * .06) - rush) * .12;
 for (const f of flakes) {
 f.p += .01; f.vx *= .95; f.vy *= .95; f.y += f.s * (1 + f.r * .3) * (1 + rush) - wind * f.r + f.vy; f.x += Math.sin(f.p) * .4 + f.vx;
 if (f.y > H + 5) { f.y = -5; f.x = Math.random() * W; } if (f.y < -6) f.y = H + 4;
 if (f.x > W + 5) f.x = -5; if (f.x < -5) f.x = W + 5;
-sx.globalAlpha = .35 + f.r * .2; sx.beginPath(); sx.arc(f.x, f.y, f.r, 0, 6.283); sx.fill();
+(f.r < 1.4 ? b0 : f.r < 2.2 ? b1 : b2).push(f);
 }
+[[b0, .5], [b1, .7], [b2, .85]].forEach(([g, a]) => { if (!g.length) return; sx.globalAlpha = a; sx.beginPath(); for (const f of g) { sx.moveTo(f.x + f.r, f.y); sx.arc(f.x, f.y, f.r, 0, 6.283); } sx.fill(); });
 sx.globalAlpha = 1;
 }
 const fc = $('#fx'), fx = fc.getContext('2d'); let parts = [];
@@ -909,7 +950,9 @@ parts.push({ k: 'shell', x: x - 6, y, vx: -3.5 - Math.random() * 2, vy: -7, r: 0
 parts.push({ k: 'shell', x: x + 6, y, vx: 3.5 + Math.random() * 2, vy: -7.5, r: 0, vr: .22, life: 90, flip: -1 });
 for (let i = 0; i < 14; i++) parts.push({ k: 'crumb', x, y, vx: (Math.random() - .5) * 9, vy: -Math.random() * 7 - 1, r: 0, vr: 0, s: Math.random() * 3 + 1.5, c: Math.random() < .5 ? '#9a6232' : '#e8cfa6', life: 70 });
 }
+let fxDirty = false;
 function drawFx() {
+if (!parts.length && !fxDirty) return; fxDirty = parts.length > 0;
 fx.clearRect(0, 0, W, H);
 parts = parts.filter(p => p.life-- > 0 && p.y < H + 40);
 for (const p of parts) {
@@ -922,7 +965,7 @@ fx.restore();
 }
 }
 function loop() { drawSnow(); drawFx(); requestAnimationFrame(loop); }
-sizeSnow(); addEventListener('resize', sizeSnow); requestAnimationFrame(loop);
+sizeSnow(); let snowW = innerWidth; addEventListener('resize', () => { if (innerWidth !== snowW || innerHeight > H + 40) { snowW = innerWidth; sizeSnow(); } }); requestAnimationFrame(loop);
 const centerOf = el => { const r = el.getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; };
 (function lights() {
 const svg = $('#lightsSvg'), NS = 'http://www.w3.org/2000/svg';
@@ -1113,6 +1156,7 @@ say(n ? `3 misses this round! You cracked ${n}.` : '3 misses this round! Try aga
 startBtn.textContent = 'Start over'; startBtn.hidden = false;
 if (n >= 15) unlock.hidden = false;
 }
+document.addEventListener('games:switch', () => { if (running) gameOver(); });
 stage.addEventListener('pointerdown', e => { e.preventDefault(); tap(); });
 stage.addEventListener('keydown', e => { if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); tap(); } });
 startBtn.addEventListener('click', start);
@@ -1228,6 +1272,7 @@ if (score) { const [x, y] = centerOf(cover); confetti(x, y, 70, 10); [1046.5, 13
 }
 timeEl.style.transform = 'scaleX(1)';
 $('#mkStart').addEventListener('click', start);
+document.addEventListener('games:switch', () => { if (running) end(); });
 })();
 (function simon() {
 const box = $('.simon'), bulbs = $$('.sbulb'), status = $('#simonStatus'), startBtn = $('#simonStart'), bestEl = $('#simonBest');
@@ -1267,6 +1312,7 @@ setTimeout(next, 650);
 }
 }));
 startBtn.addEventListener('click', () => { seq = []; playing = true; startBtn.hidden = true; next(); });
+document.addEventListener('games:switch', () => { if (playing) { playing = false; accepting = false; seq = []; startBtn.textContent = 'Start'; startBtn.hidden = false; status.textContent = 'Can you get past round 8?'; } });
 })();
 (function catchGame() {
 const box = $('#catchBox'), cv = $('#catchCv'), c = cv.getContext('2d'), cover = $('#ctCover');
@@ -1328,8 +1374,24 @@ $('#ctStart').textContent = 'Play again'; cover.hidden = false;
 if (score) { const [x, y] = centerOf(cover); confetti(x, y, 60, 9); }
 }
 $('#ctStart').addEventListener('click', start);
+document.addEventListener('games:switch', () => { if (running) end(); });
+document.addEventListener('games:show', e => { if (e.detail === 'sweets') { size(); draw(); } });
 addEventListener('resize', () => { if (!running) size(); });
 size();
+})();
+(function arcade() {
+const tabs = $$('.gcard'), picker = $('.picker');
+const show = (id, jump) => {
+document.dispatchEvent(new CustomEvent('games:switch', { detail: id }));
+tabs.forEach(t => { const on = t.dataset.game === id; t.setAttribute('aria-selected', on); t.tabIndex = on ? 0 : -1; t.querySelector('i').textContent = on ? 'Playing' : 'Play';
+if (on) picker.scrollTo({ left: t.offsetLeft - (picker.clientWidth - t.offsetWidth) / 2, behavior: reduce ? 'auto' : 'smooth' }); });
+$$('.gpanel').forEach(p => p.hidden = p.id !== 'gp-' + id);
+document.dispatchEvent(new CustomEvent('games:show', { detail: id }));
+if (jump) { const p = $('#gp-' + id), y = p.getBoundingClientRect().top + scrollY - 12; if (Math.abs(y - scrollY) > 40) scrollTo({ top: y, behavior: reduce ? 'auto' : 'smooth' }); }
+bell(1318.5, .35, .1);
+};
+tabs.forEach(t => t.addEventListener('click', () => show(t.dataset.game, true)));
+picker.addEventListener('keydown', e => { const i = tabs.findIndex(t => t.getAttribute('aria-selected') === 'true'), d = e.key === 'ArrowRight' ? 1 : e.key === 'ArrowLeft' ? -1 : 0; if (!d) return; e.preventDefault(); const n = tabs[(i + d + tabs.length) % tabs.length]; n.focus(); show(n.dataset.game, false); });
 })();
 (function names() {
 const A = ['Captain', 'Sergeant', 'Duchess', 'Sir', 'Lady', 'General', 'Prince', 'Admiral', 'Baroness', 'Major', 'Princess', 'Colonel', 'Countess', 'Lieutenant'];
