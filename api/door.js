@@ -34,6 +34,10 @@ export default async function handler(req, res) {
         ORDER BY buyer_name, payment_id, seat_no LIMIT 50`;
       return res.json({ tickets });
     }
+    case "list": {
+      const tickets = await db`SELECT * FROM tickets ORDER BY lower(coalesce(buyer_name, buyer_email, '')), payment_id, seat_no`;
+      return res.json({ tickets });
+    }
     case "checkin": {
       const [t] = await db`SELECT * FROM tickets WHERE code = ${code}`;
       if (!t) return res.status(404).json({ error: "No ticket with that number" });
